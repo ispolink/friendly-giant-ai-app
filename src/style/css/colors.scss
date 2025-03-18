@@ -1,0 +1,223 @@
+$ispo-blue: #0000ff;
+$prusian-blue: #1c2d41;
+$medium-aquamarin: #3ddfb4;
+$sunglow-yellow: #ffd347;
+$brink-pink: #ff6a6a;
+
+$ispo-blue-120: #0000b6;
+$ispo-blue-110: #0000db;
+$ispo-blue-90: #1934ff;
+$ispo-blue-80: #3363ff;
+$ispo-blue-70: #6565f3;
+$ispo-blue-60: #84a1ff;
+$ispo-blue-50: #98b0ff;
+$ispo-blue-40: #adc0ff;
+$ispo-blue-30: #ced2d6;
+$ispo-blue-20: #d6e0ff;
+$ispo-blue-15: #e5e5fd;
+$ispo-blue-10: #eaefff;
+$ispo-blue-5: #f2f2fe;
+$ispo-blue-1: #f8faff;
+$ispo-blue-dark-10: #0000b3;
+$ispo-blue-dark-40: #000077;
+
+$ispo-gray: $prusian-blue;
+$ispo-gray-255: #000000;
+$ispo-gray-180: #0e1620;
+$ispo-gray-90: #324153;
+$ispo-gray-80: #495767;
+$ispo-gray-70: #5f6b79;
+$ispo-gray-60: #76818d;
+$ispo-gray-50: #8d959f;
+$ispo-gray-40: #a4abb3;
+$ispo-gray-30: #babfc5;
+$ispo-gray-20: #d1d5d9;
+$ispo-gray-10: #e7e9eb;
+$ispo-gray-5: #f2f3f4;
+$ispo-gray-dark-10: #101a26;
+$ispo-gray-dark-40: #000000;
+
+$ispo-green: $medium-aquamarin;
+$ispo-green-140: #1daf88;
+$ispo-green-120: #22d3a4;
+$ispo-green-90: #50e2bb;
+$ispo-green-80: #63e5c3;
+$ispo-green-70: #76e8ca;
+$ispo-green-60: #8aecd2;
+$ispo-green-50: #9defd9;
+$ispo-green-40: #b1f2e1;
+$ispo-green-30: #c4f5e8;
+$ispo-green-20: #d8f9f0;
+$ispo-green-10: #ebfcf7;
+
+$ispo-yellow: $sunglow-yellow;
+$ispo-yellow-140: #e9b300;
+$ispo-yellow-120: #ffc919;
+$ispo-yellow-90: #ffd759;
+$ispo-yellow-80: #ffdb6b;
+$ispo-yellow-70: #ffe07d;
+$ispo-yellow-60: #ffe490;
+$ispo-yellow-50: #ffe9a2;
+$ispo-yellow-40: #ffedb5;
+$ispo-yellow-30: #fff2c7;
+$ispo-yellow-20: #fff6da;
+$ispo-yellow-10: #fffbec;
+
+$ispo-red: $brink-pink;
+$ispo-red-140: #e9003e;
+$ispo-red-120: #ff1956;
+$ispo-red-100: #ff4878;
+$ispo-red-90: #ff5985;
+$ispo-red-80: #ff6c93;
+$ispo-red-70: #ff7ea0;
+$ispo-red-60: #ff91ae;
+$ispo-red-50: #ffa3bb;
+$ispo-red-40: #ffb5c9;
+$ispo-red-30: #ffc7d6;
+$ispo-red-20: #ffdae4;
+$ispo-red-10: #ffecf1;
+
+$ispo-great-grean: #55c883;
+$ispo-great-grean-60: #99deb4;
+$ispo-great-grean-20: #ddf4e6;
+
+$ispo-cyan: #00c7c0;
+$ispo-cyan-20: #d0f5f5;
+
+$ispo-okay-grean: #bce97d;
+$ispo-okay-grean-60: #d6f1b0;
+$ispo-okay-grean-20: #f1fae4;
+
+$ispo-medium-yellow: #efe26f;
+$ispo-medium-yellow-60: #f4eca7;
+$ispo-medium-yellow-20: #fbf8e1;
+
+$ispo-bad-orange: #f5b272;
+$ispo-bad-orange-60: #f8d0a9;
+$ispo-bad-orange-20: #fcefe2;
+
+$ispo-warning-red: $brink-pink;
+$ispo-warning-red-60: #fea4ad;
+$ispo-warning-red-20: #fee0e3;
+
+$primary-color: $ispo-blue !default;
+$secondary-color: $ispo-great-grean !default;
+$button-color: $primary-color !default;
+$button-text-color: #fff !default;
+
+$dark-paper-background: #233346;
+$dark-paper-background-light: #4a5768;
+$dark-paper-background-light-more: #4c596b;
+
+:export {
+  ispo_blue: $ispo-blue;
+  prusian_blue: $prusian-blue;
+  medium_aquamarin: $medium-aquamarin;
+  sunglow_yellow: $sunglow-yellow;
+  brink_pink: $brink-pink;
+
+  ispo_blue_120: $ispo-blue-120;
+  ispo_blue_110: $ispo-blue-110;
+  ispo_blue_90: $ispo-blue-90;
+  ispo_blue_80: $ispo-blue-80;
+  ispo_blue_70: $ispo-blue-70;
+  ispo_blue_60: $ispo-blue-60;
+  ispo_blue_50: $ispo-blue-50;
+  ispo_blue_40: $ispo-blue-40;
+  ispo_blue_30: $ispo-blue-30;
+  ispo_blue_20: $ispo-blue-20;
+  ispo_blue_15: $ispo-blue-15;
+  ispo_blue_10: $ispo-blue-10;
+  ispo_blue_5: $ispo-blue-5;
+  ispo_blue_1: $ispo-blue-1;
+  ispo_blue_dark_10: $ispo-blue-dark-10;
+  ispo_blue_dark_40: $ispo-blue-dark-40;
+
+  ispo_gray: $ispo-gray;
+  ispo_gray_255: $ispo-gray-255;
+  ispo_gray_180: $ispo-gray-180;
+  ispo_gray_90: $ispo-gray-90;
+  ispo_gray_80: $ispo-gray-80;
+  ispo_gray_70: $ispo-gray-70;
+  ispo_gray_60: $ispo-gray-60;
+  ispo_gray_50: $ispo-gray-50;
+  ispo_gray_40: $ispo-gray-40;
+  ispo_gray_30: $ispo-gray-30;
+  ispo_gray_20: $ispo-gray-20;
+  ispo_gray_10: $ispo-gray-10;
+  ispo_gray_5: $ispo-gray-5;
+  ispo_gray_dark_10: $ispo-gray-dark-10;
+  ispo_gray_dark_40: $ispo-gray-dark-40;
+
+  ispo_green: $ispo-green;
+  ispo_green_140: $ispo-green-140;
+  ispo_green_120: $ispo-green-120;
+  ispo_green_90: $ispo-green-90;
+  ispo_green_80: $ispo-green-80;
+  ispo_green_70: $ispo-green-70;
+  ispo_green_60: $ispo-green-60;
+  ispo_green_50: $ispo-green-50;
+  ispo_green_40: $ispo-green-40;
+  ispo_green_30: $ispo-green-30;
+  ispo_green_20: $ispo-green-20;
+  ispo_green_10: $ispo-green-10;
+
+  ispo_yellow: $ispo-yellow;
+  ispo_yellow_140: $ispo-yellow-140;
+  ispo_yellow_120: $ispo-yellow-120;
+  ispo_yellow_90: $ispo-yellow-90;
+  ispo_yellow_80: $ispo-yellow-80;
+  ispo_yellow_70: $ispo-yellow-70;
+  ispo_yellow_60: $ispo-yellow-60;
+  ispo_yellow_50: $ispo-yellow-50;
+  ispo_yellow_40: $ispo-yellow-40;
+  ispo_yellow_30: $ispo-yellow-30;
+  ispo_yellow_20: $ispo-yellow-20;
+  ispo_yellow_10: $ispo-yellow-10;
+
+  ispo_red: $ispo-red;
+  ispo_red_140: $ispo-red-140;
+  ispo_red_120: $ispo-red-120;
+  ispo_red_100: $ispo-red-100;
+  ispo_red_90: $ispo-red-90;
+  ispo_red_80: $ispo-red-80;
+  ispo_red_70: $ispo-red-70;
+  ispo_red_60: $ispo-red-60;
+  ispo_red_50: $ispo-red-50;
+  ispo_red_40: $ispo-red-40;
+  ispo_red_30: $ispo-red-30;
+  ispo_red_20: $ispo-red-20;
+  ispo_red_10: $ispo-red-10;
+
+  ispo_great_grean: $ispo-great-grean;
+  ispo_great_grean_60: $ispo-great-grean-60;
+  ispo_great_grean_20: $ispo-great-grean-20;
+
+  ispo_okay_grean: $ispo-okay-grean;
+  ispo_okay_grean_60: $ispo-okay-grean-60;
+  ispo_okay_grean_20: $ispo-okay-grean-20;
+
+  ispo_cyan: $ispo-cyan;
+  ispo_cyan_20: $ispo-cyan-20;
+
+  ispo_medium_yellow: $ispo-medium-yellow;
+  ispo_medium_yellow_60: $ispo-medium-yellow-60;
+  ispo_medium_yellow_20: $ispo-medium-yellow-20;
+
+  ispo_bad_orange: $ispo-bad-orange;
+  ispo_bad_orange_60: $ispo-bad-orange-60;
+  ispo_bad_orange_20: $ispo-bad-orange-20;
+
+  ispo_warning_red: $ispo-warning-red;
+  ispo_warning_red_60: $ispo-warning-red-60;
+  ispo_warning_red_20: $ispo-warning-red-20;
+
+  primary_color: $primary-color;
+  secondary_color: $secondary-color;
+  button_color: $button-color;
+  button_text_color: $button-text-color;
+
+  dark_paper_background: $dark-paper-background;
+  dark_paper_background_light: $dark-paper-background-light;
+  dark_paper_background_light_more: $dark-paper-background-light-more;
+}

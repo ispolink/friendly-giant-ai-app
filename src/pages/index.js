@@ -1,6 +1,6 @@
 // pages/index.js
 import { useEffect, useState} from 'react';
-import { Button, IconButton, InputBase, Paper } from '@mui/material'
+import { Button, InputBase, Paper, CircularProgress, Link } from '@mui/material'
 import ButtonBase from '@mui/material/ButtonBase';
 import styled from '@emotion/styled';
 import { Tweet } from 'react-tweet'
@@ -8,19 +8,83 @@ import { appKitModal } from '@/config';
 import { breakpointsUp } from '@/utils/responsive';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { getTweetId } from '@/utils/getTweetId';
+import {
+  useTokenBalance,
+  useActionPrices,
+  useAnalyzeToken,
+  useInteractWithPost
+} from '@/components/web3';
+import { XActionType } from '@/constants';
+import { getBlockExplorerUrl } from '@/config/chain';
+import { useChainId } from 'wagmi';
 
 export default function Home() {
   const [command, setCommand] = useState()
   const [url, setUrl] = useState('')
   const [tweetId, setTweetId] = useState()
+  const [isInsfficientFunds, setInsfficientFunds] = useState(false)
+  const [isBusy, setBusy] = useState(false)
+
+  const chainId = useChainId()
+  const { refetch: refetchBalance, ...balanceStatus} = useTokenBalance()
+  const { refetch: refetchPrices, ...priceStatus } = useActionPrices()
+  const { analyze, ...analyzeStatus } = useAnalyzeToken();
+  const { interact, ...interactStatus } = useInteractWithPost();
+
+  const onPublish = async () => {
+    if (!command) return
+    setBusy(true)
+    const [balanceResult, priceResult] = await Promise.all([
+      refetchBalance(),
+      refetchPrices()
+    ])
+    if (balanceResult.isError || priceResult.isError) {
+      console.error('error on fetching price')
+      setBusy(false)
+      return;
+    }
+    const balance = balanceResult.data
+    const amount = priceResult.data[command.aType]
+    
+    if (balance < amount) {
+      setInsfficientFunds(true)
+      setBusy(false)
+      return
+    }
+
+    if (command.aType == XActionType.TokenAnalysis) {
+      await analyze(url)
+    } else {
+      await interact(command.aType, url)
+    }
+    setBusy(false)
+  }
+
+  const getHash = () => {
+    if (!command) return;
+    if (command.aType == XActionType.TokenAnalysis) {
+      return analyzeStatus.hash
+    } else {
+      return interactStatus.hash
+    }
+  }
+
+  const isPending = () => {
+    if (!command) return false;
+    if (command.aType == XActionType.TokenAnalysis) {
+      return analyzeStatus.isPending
+    } else {
+      return interactStatus.isPending
+    }
+  }
 
   const commands = [
-    {id: 'like', name: 'Like'},
-    {id: 'reply', name: 'Reply'},
-    {id: 'reply-thread', name: 'Reply To Thread'},
-    {id: 'analysis', name: 'Token Analysis'},
-    {id: 'retweet', name: 'Retweet'},
-    {id: 'retweet-comment', name: 'Retweet & Comment'},
+    {id: 'like', name: 'Like', aType: XActionType.Like},
+    {id: 'reply', name: 'Reply', aType: XActionType.Reply},
+    {id: 'reply-thread', name: 'Reply To Thread', aType: XActionType.ReplyToThread},
+    {id: 'analysis', name: 'Token Analysis', aType: XActionType.TokenAnalysis},
+    {id: 'retweet', name: 'Retweet', aType: XActionType.Repost},
+    {id: 'retweet-comment', name: 'Retweet & Comment', aType: XActionType.RepostWithComment},
   ]
 
   const accountState = useAppKitAccount()
@@ -33,8 +97,13 @@ export default function Home() {
           {commands.map(c => (
             <ButtonBase
               key={c.id}
-              className={`${c.id} ${command && command != c.id ? 'gray' : ''}`}
-              onClick={() => setCommand(c.id)}
+              className={`${c.id} ${command && command.id != c.id ? 'gray' : ''}`}              
+              onClick={async () => {
+                setInsfficientFunds(false)
+                analyzeStatus.reset()
+                interactStatus.reset()
+                setCommand(c)
+              }}
             >
               {c.name}
             </ButtonBase>
@@ -45,7 +114,7 @@ export default function Home() {
             <PaperBox className={(url && !getTweetId(url)) ? 'error' : ''} sx={{ p: 1, display: 'flex', alignItems: 'center'}}>
               <InputBase
                 sx={{ mr: 1, flex: 1 }}
-                placeholder="Put your x.com url heres"
+                placeholder="Put your X Post status link here"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => {
@@ -54,16 +123,53 @@ export default function Home() {
                   }
                 }}
               />
-              <SendButton onClick={() => setTweetId(getTweetId(url))}>
+              <SendButton disabled={!url || (url && !getTweetId(url))} onClick={() => setTweetId(getTweetId(url))}>
                 <img src="./icon_send.svg" alt="send"/>
               </SendButton>
             </PaperBox>
             {(url && !getTweetId(url)) && (
               <Error>
-                Please a valid tweet url
+                Please a valid X Post link
               </Error>
             )}
-            <BlueButton sx={{ width: '100%' }}>Publish</BlueButton>
+            <BlueButton
+              sx={{ width: '100%' }}
+              disabled={
+                (!tweetId && (!url || (url && !getTweetId(url)))) ||
+                balanceStatus.isLoading || priceStatus.isLoading ||
+                analyzeStatus.isLoading || interactStatus.isLoading ||
+                isInsfficientFunds || isBusy
+              }
+              onClick={() => tweetId ? onPublish() : setTweetId(getTweetId(url))}
+            >
+              {(
+                balanceStatus.isLoading || priceStatus.isLoading ||
+                analyzeStatus.isLoading || interactStatus.isLoading ||
+                isBusy
+              ) && (
+                <CircularProgress
+                  size={20}
+                  color="inherit"
+                />
+              )}
+              {!tweetId ? 'Preview' : isInsfficientFunds ? 'Insufficient funds' : 'Publish'}
+            </BlueButton>
+            {getHash() && (
+              <HashText>
+                View TX:
+                {isPending() && (
+                  <CircularProgress
+                    size={14}
+                    color="inherit"
+                  />
+                )}
+                <TxLink
+                  href={getBlockExplorerUrl(chainId, getHash())}
+                  underline="none"
+                  target="_blank"
+                >{getHash()}</TxLink>
+              </HashText>
+            )}
           </>
         )}
       </div>
@@ -144,8 +250,9 @@ const MenuGrid = styled.div`
 
     ${breakpointsUp('font-size', [{ 0: '1rem  !important' }, { 1024: '1.5rem  !important' }])};
     ${breakpointsUp('padding', [{ 0: '12px 16px  !important' }, { 1024: '20px 24px  !important' }])};
-
+    margin: 1px !important;
     &:hover {
+      margin: 0 !important;
       border: 2px solid ${props => props.theme.palette.colors.formControl.hover.border} !important;
     }
 
@@ -156,7 +263,7 @@ const MenuGrid = styled.div`
     &.retweet { background-image: url('./icon-5_retweet.png'); }
     &.retweet-comment { background-image: url('./icon-6_retweet_and_comment.png'); }
 
-    &.gray {
+    &.gray, &.Mui-disabled {
       filter: grayscale(1) brightness(0.9);
       opacity: 0.5;
     }
@@ -232,13 +339,21 @@ const RedButton = styled(Button)`
   text-transform: none;
 `
 
-const BlueButton = styled(Button)`
+const BlueButton = styled(ButtonBase)`
   color: ${props => props.theme.palette.primary.contrastText};
   background: ${props => props.theme.palette.primary.main};
   padding: 8px 18px;
   border-radius: 100px;
   font-size: 1.125rem;
   text-transform: none;
+  &.Mui-disabled {
+    filter: grayscale(1) brightness(0.9);
+    opacity: 0.5;
+    color: ${props => props.theme.palette.primary.contrastText};
+  }
+  .MuiCircularProgress-root {
+    margin-right: 16px;
+  }
 `
 
 const SendButton = styled(BlueButton)`
@@ -300,4 +415,22 @@ const EmptyCircle = styled.div`
   ${breakpointsUp('height', [{ 0: '190px' }, { 1024: '192px' }])};
   border-radius: 192px;
   background-color: ${props => props.theme.palette.colors.formControl.autofill.background};
+`
+
+const HashText = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  align-items: center;
+
+  > * {
+    margin-left: 8px !important;
+  }
+`
+
+const TxLink = styled(Link)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  width: 240px;
 `

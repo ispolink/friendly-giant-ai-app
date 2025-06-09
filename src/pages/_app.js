@@ -9,6 +9,7 @@ import { UserTheme } from '@/constants'
 import { DarkTheme, LightTheme } from '@/style/theme';
 import Layout from '@/components/layout';
 import { appKitModal } from '@/config';
+import ContextProvider from '@/context';
 
 // Client-side  Emotion Cache
 const clientSideEmotionCache = createEmotionCache({ key: "css", prepend: true });
@@ -35,56 +36,58 @@ function MyApp({
   }, [systemTheme])
 
   return (
-    <CacheProvider value={emotionCache}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Global
-          styles={props => css`
-            body {
-              input:-webkit-autofill,
-              input:-webkit-autofill:hover,
-              input:-webkit-autofill:focus,
-              textarea:-webkit-autofill,
-              textarea:-webkit-autofill:hover,
-              textarea:-webkit-autofill:focus,
-              select:-webkit-autofill,
-              select:-webkit-autofill:hover,
-              select:-webkit-autofill:focus {
-                border-radius: 0;
-                -webkit-text-fill-color: ${theme.palette.colors.formControl.autofill.color};
-                -webkit-box-shadow: 0 0 0 30px
-                  ${theme.palette.colors.formControl.autofill.background} inset !important;
-              }
-              overflow-x: hidden;
+    <ContextProvider>
+      <CacheProvider value={emotionCache}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Global
+            styles={props => css`
+              body {
+                input:-webkit-autofill,
+                input:-webkit-autofill:hover,
+                input:-webkit-autofill:focus,
+                textarea:-webkit-autofill,
+                textarea:-webkit-autofill:hover,
+                textarea:-webkit-autofill:focus,
+                select:-webkit-autofill,
+                select:-webkit-autofill:hover,
+                select:-webkit-autofill:focus {
+                  border-radius: 0;
+                  -webkit-text-fill-color: ${theme.palette.colors.formControl.autofill.color};
+                  -webkit-box-shadow: 0 0 0 30px
+                    ${theme.palette.colors.formControl.autofill.background} inset !important;
+                }
+                overflow-x: hidden;
 
-              ::-webkit-scrollbar {
-                width: 6px;
-                height: 6px;
+                ::-webkit-scrollbar {
+                  width: 6px;
+                  height: 6px;
+                }
               }
-            }
-            ::-webkit-scrollbar-thumb {
-              border-radius: 100px;
-              & {
-                background: ${theme.palette.colors.scrollbar.scrollbar};
+              ::-webkit-scrollbar-thumb {
+                border-radius: 100px;
+                & {
+                  background: ${theme.palette.colors.scrollbar.scrollbar};
+                }
+                &:hover {
+                  background: ${theme.palette.colors.scrollbar.scrollbarHover};
+                }
               }
-              &:hover {
-                background: ${theme.palette.colors.scrollbar.scrollbarHover};
+              .MuiSelect-icon,
+              .MuiAutocomplete-endAdornment .MuiSvgIcon-root {
+                color: ${theme.palette.colors.formControl.selectIconColor} !important;
               }
-            }
-            .MuiSelect-icon,
-            .MuiAutocomplete-endAdornment .MuiSvgIcon-root {
-              color: ${theme.palette.colors.formControl.selectIconColor} !important;
-            }
-            .ck-balloon-panel {
-              display: none !important;
-            }
-          `}
-        />
-        <Layout className={themId}>
-          <Component {...pageProps} />
-        </Layout>
-      </ThemeProvider>
-    </CacheProvider>
+              .ck-balloon-panel {
+                display: none !important;
+              }
+            `}
+          />
+          <Layout className={themId}>
+            <Component {...pageProps} />
+          </Layout>
+        </ThemeProvider>
+      </CacheProvider>
+    </ContextProvider>
   );
 }
 

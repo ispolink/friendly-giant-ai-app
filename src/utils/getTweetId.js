@@ -12,10 +12,7 @@ export function getTweetId(url) {
     ) {
       const pathParts = urlObject.pathname.split('/');
 
-      if (
-        pathParts.length >= 3 &&
-        (pathParts[1] === 'status' || pathParts[2] === 'status')
-      ) {
+      if (pathParts.length >= 4 && pathParts[2] === 'status') {
         const tweetId = pathParts[pathParts.length - 1];
         if (/^\d+$/.test(tweetId)) {
           return tweetId;

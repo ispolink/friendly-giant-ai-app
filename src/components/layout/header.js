@@ -7,14 +7,13 @@ import { useAppKitAccount, useAppKitNetwork, useWalletInfo, useDisconnect } from
 import { appKitModal } from '@/config';
 import { chains } from '@/config/chain'
 import { breakpointsUp } from '@/utils/responsive';
-import useIspBalance from '../ispolink/useIspBalance';
+import useTokenBalance from '../web3/useTokenBalance';
 import { formatTokenAmount } from '@/utils/currencies';
 
 const logoSVG_W = './ispolink_logo_blue_w.svg';
 const logoSVG_B = './ispolink_logo_blue_b.svg';
 
-const iconSVG_W = './ispolink_logo_icon_w.svg';
-const iconSVG_C = './ispolink_logo_icon_c.svg';
+const tokenIcon = './giantai_logo_01.png';
 
 const Logo = ({ ...props }) => {
   const theme = useTheme()
@@ -22,8 +21,7 @@ const Logo = ({ ...props }) => {
 }
 
 const IspolinkLogo = ({ ...props }) => {
-  const theme = useTheme()
-  return <img alt="" {...props} src={theme.palette.mode === 'dark' ? iconSVG_W : iconSVG_C} />
+  return <img alt="" {...props} src={tokenIcon} />
 }
 
 export default function Header () {
@@ -33,14 +31,14 @@ export default function Header () {
   const { chainId } = useAppKitNetwork()
   const { walletInfo } = useWalletInfo()
   const { disconnect } = useDisconnect()
-  const ispBalance = useIspBalance()
+  const tokenBalance = useTokenBalance()
 
   const isActive = accountState.isConnected
 
   useEffect(() => {
     if (chainId) {
       if (chainId != chain?.chainId) {
-        const _chain = chains.find(c => c.chainId = chainId)
+        const _chain = chains.find(c => c.chainId == chainId)
         setChain(_chain)
       }
     }
@@ -57,7 +55,7 @@ export default function Header () {
               <RoundButtonIcon>
                 <IspolinkLogo />
               </RoundButtonIcon>
-              <BalanceLabel end="">{formatTokenAmount(ispBalance, true)}</BalanceLabel> $ISP
+              <BalanceLabel end="">{formatTokenAmount(tokenBalance.balance, true)}</BalanceLabel> $GGAI
             </RoundButton>
             <RoundButton
               onClick={() => appKitModal.open({ view: 'Networks' })}

@@ -3,7 +3,7 @@
 // import { cookieStorage, createStorage, http } from '@wagmi/core'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import { createAppKit } from '@reown/appkit/react' 
-import { mainnet, polygon, bsc, manta } from '@reown/appkit/networks'
+import { mainnet, polygon, bsc, baseSepolia } from '@reown/appkit/networks'
 
 // Get projectId from https://cloud.reown.com
 export const reownProjectId = process.env.REACT_APP_REOWN_PROJECT_ID || 'PROJECT_ID'
@@ -12,8 +12,11 @@ if (!reownProjectId) {
   throw new Error('Reown Project ID is not defined')
 }
 
-
-export const networks = [mainnet, polygon, bsc]
+export const mainNetworks = [
+  // mainnet, polygon, bsc
+]
+export const testNetworks = [baseSepolia]
+export const networks = [...mainNetworks, ...testNetworks]
 
 //Set up the Wagmi Adapter (Config)
 export const wagmiAdapter = new WagmiAdapter({

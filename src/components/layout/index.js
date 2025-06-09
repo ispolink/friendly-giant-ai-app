@@ -1,5 +1,7 @@
 import styled from '@emotion/styled';
-import Header from './header';
+// import Header from './header';
+import dynamic from 'next/dynamic'
+const Header = dynamic(() => import('./header'), { ssr: false })
 
 export default function RootLayout({ children, className, ...props }) {
 

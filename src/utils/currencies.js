@@ -1,27 +1,27 @@
-import { BigNumber } from '@ethersproject/bignumber'
-import { commify, formatEther } from '@ethersproject/units'
 
 /**
  * Format a cryptocurrency amount to a specified precision
  *
- * @param {BigNumber} tokenAmount
+ * @param {BigInt} tokenAmount
  * @param {Boolean} compactNotation
  * @param {Number} precision
  * @returns {string}
  */
-export function formatTokenAmount(tokenAmount, compactNotation = false, precision = 5) {
-  if (!tokenAmount || !(tokenAmount.mod)) {
+export function formatTokenAmount(tokenAmount, precision = 5, locale = 'en-US') {
+  if (!tokenAmount) {
     return '0'
   }
 
   const weiDecimals = 18
-  const precisionWei = weiDecimals - precision
-  const decimalPlacesWei = BigNumber.from(10).pow(precisionWei)
-  const remainder = tokenAmount.mod(decimalPlacesWei)
-  const roundedAmount = tokenAmount.sub(remainder)
+  const divisor = BigInt(10 ** weiDecimals)
+  const integerPart = tokenAmount / divisor
+  const fractionPart = tokenAmount % divisor
 
-  const result = formatEther(roundedAmount)
-  return compactNotation
-    ? new Intl.NumberFormat('en-US', { notation: 'compact' }).format(Number(result))
-    : commify(result).replace(/\.0+$/g, '')
+  const fractionStr = (fractionPart * BigInt(10 ** precision) / divisor)
+    .toString()
+    .padStart(precision, '0')
+
+  const number = Number(`${integerPart}.${fractionStr}`)
+
+  return  new Intl.NumberFormat(locale, { notation: 'compact' }).format(Number(number))
 }

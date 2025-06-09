@@ -1,11 +1,9 @@
-
 // context/index.js
 'use client'
 
 import React from 'react'
 import { wagmiAdapter, reownProjectId } from '@/config'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { mainnet, polygon, bsc } from '@reown/appkit/networks'
 import { cookieToInitialState, WagmiProvider } from 'wagmi'
 
 

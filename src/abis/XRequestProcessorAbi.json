@@ -1,0 +1,325 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "paymentToken",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableInvalidOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableUnauthorizedAccount",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "payer",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "enum XActionType",
+        "name": "actionType",
+        "type": "uint8"
+      },
+      {
+        "indexed": true,
+        "internalType": "string",
+        "name": "xPostUri",
+        "type": "string"
+      }
+    ],
+    "name": "NewPostInteraction",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "payer",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "string",
+        "name": "tokenTicker",
+        "type": "string"
+      }
+    ],
+    "name": "NewTokenAnalysis",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "newToken",
+        "type": "address"
+      }
+    ],
+    "name": "PaymentTokenChanged",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "tokenTicker",
+        "type": "string"
+      }
+    ],
+    "name": "analyzeToken",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum XActionType",
+        "name": "actionType",
+        "type": "uint8"
+      }
+    ],
+    "name": "getActionPrice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getActionPriceAll",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "likeAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "replyAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "replyToThreadAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "repostAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "repostWithCommentAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "tokenAnalysisAmount",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum XActionType",
+        "name": "actionType",
+        "type": "uint8"
+      },
+      {
+        "internalType": "string",
+        "name": "postUri",
+        "type": "string"
+      }
+    ],
+    "name": "interactWithPost",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum XActionType",
+        "name": "actionType",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "tokenAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "setActionPrice",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "likeAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "replyAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "replyToThreadAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "repostAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "repostWithCommentAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "tokenAnalysisAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "setActionPriceAll",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newToken",
+        "type": "address"
+      }
+    ],
+    "name": "setPaymentTokenAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      }
+    ],
+    "name": "withdrawFunds",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

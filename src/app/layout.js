@@ -1,5 +1,3 @@
-import { headers } from 'next/headers';
-import ContextProvider from '@/context'
 import "./globals.css";
 
 export const metadata = {
@@ -8,12 +6,10 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  const cookies = headers().get('cookie')
-
-  return (
+    return (
     <html lang="en">
       <body>
-        <ContextProvider cookies={cookies}>{children}</ContextProvider>
+        {children}
       </body>
     </html>
   );

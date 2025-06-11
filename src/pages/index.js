@@ -87,6 +87,8 @@ export default function Home() {
     {id: 'retweet-comment', name: 'Retweet & Comment', aType: XActionType.RepostWithComment},
   ]
 
+  const comingSoonCommands = ['reply-thread', 'analysis']
+
   const accountState = useAppKitAccount()
 
   return accountState.isConnected ? (
@@ -95,18 +97,24 @@ export default function Home() {
         <HomeTitle>Friendly Giant AI Agent</HomeTitle>
         <MenuGrid>
           {commands.map(c => (
-            <ButtonBase
-              key={c.id}
-              className={`${c.id} ${command && command.id != c.id ? 'gray' : ''}`}              
-              onClick={async () => {
-                setInsfficientFunds(false)
-                analyzeStatus.reset()
-                interactStatus.reset()
-                setCommand(c)
-              }}
-            >
-              {c.name}
-            </ButtonBase>
+            <div className='button-container'>
+              <ButtonBase
+                key={c.id}
+                className={`${c.id} ${command && command.id != c.id ? 'gray' : ''}`}
+                disabled={comingSoonCommands.includes(c.id)}
+                onClick={async () => {
+                  setInsfficientFunds(false)
+                  analyzeStatus.reset()
+                  interactStatus.reset()
+                  setCommand(c)
+                }}
+              >
+                {c.name}
+              </ButtonBase>
+              {comingSoonCommands.includes(c.id) && (
+                <img alt={`coming_soon_${c.id}`} src="./icon_coming_soon_dark.svg" />
+              )}
+            </div>
           ))}
         </MenuGrid>
         {command && (
@@ -235,37 +243,49 @@ const MenuGrid = styled.div`
   ])};
   ${breakpointsUp('margin-bottom', [{ 0: '16px' }, { 1024: '32px' }, { 1536: '25px' }])};
   ${breakpointsUp('grid-gap', [{ 0: '16px' }, { 1024: '24px' }])};
-  > * {
-    border-radius: 16px !important;
-    border: 1px solid ${props => props.theme.palette.colors.formControl.border} !important;
-    cursor: pointer !important;
-    user-select: none !important;
-    font-weight: 600 !important;
-    background-position: right bottom !important;
-    background-repeat: no-repeat !important;
-    background-size: auto 84% !important;
-    justify-content: flex-start !important;
-    align-items: flex-start !important;
-    transition: all .15s cubic-bezier(.5,1,.25,1);
+  > .button-container {
+    position: relative;
+    display: flex;
+    > button {
+      width: 100%;
+      border-radius: 16px !important;
+      border: 1px solid ${props => props.theme.palette.colors.formControl.border} !important;
+      cursor: pointer !important;
+      user-select: none !important;
+      font-weight: 600 !important;
+      background-position: right bottom !important;
+      background-repeat: no-repeat !important;
+      background-size: auto 84% !important;
+      justify-content: flex-start !important;
+      align-items: flex-start !important;
+      transition: all .15s cubic-bezier(.5,1,.25,1);
 
-    ${breakpointsUp('font-size', [{ 0: '1rem  !important' }, { 1024: '1.5rem  !important' }])};
-    ${breakpointsUp('padding', [{ 0: '12px 16px  !important' }, { 1024: '20px 24px  !important' }])};
-    margin: 1px !important;
-    &:hover {
-      margin: 0 !important;
-      border: 2px solid ${props => props.theme.palette.colors.formControl.hover.border} !important;
+      ${breakpointsUp('font-size', [{ 0: '1rem  !important' }, { 1024: '1.5rem  !important' }])};
+      ${breakpointsUp('padding', [{ 0: '12px 16px  !important' }, { 1024: '20px 24px  !important' }])};
+      margin: 1px !important;
+      &:hover {
+        margin: 0 !important;
+        border: 2px solid ${props => props.theme.palette.colors.formControl.hover.border} !important;
+      }
+
+      &.like { background-image: url('./icon-1_like.png'); }
+      &.reply { background-image: url('./icon-2_reply.png'); }
+      &.reply-thread { background-image: url('./icon-3_reply-to-thread.png'); }
+      &.analysis { background-image: url('./icon-4_token-analysis.png'); }
+      &.retweet { background-image: url('./icon-5_retweet.png'); }
+      &.retweet-comment { background-image: url('./icon-6_retweet_and_comment.png'); }
+
+      &.gray, &.Mui-disabled {
+        filter: grayscale(1) brightness(0.9);
+        opacity: 0.5;
+      }
     }
 
-    &.like { background-image: url('./icon-1_like.png'); }
-    &.reply { background-image: url('./icon-2_reply.png'); }
-    &.reply-thread { background-image: url('./icon-3_reply-to-thread.png'); }
-    &.analysis { background-image: url('./icon-4_token-analysis.png'); }
-    &.retweet { background-image: url('./icon-5_retweet.png'); }
-    &.retweet-comment { background-image: url('./icon-6_retweet_and_comment.png'); }
-
-    &.gray, &.Mui-disabled {
-      filter: grayscale(1) brightness(0.9);
-      opacity: 0.5;
+    img {
+      position: absolute;
+      ${breakpointsUp('width', [{ 0: '64px' }, { 1024: '80px' }])};
+      ${breakpointsUp('right', [{ 0: '-12px' }, { 1024: '-20px' }])};
+      ${breakpointsUp('top', [{ 0: '-12px' }, { 1024: '-20px' }])};
     }
   }
 `

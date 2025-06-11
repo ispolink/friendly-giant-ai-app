@@ -83,8 +83,8 @@ export default function Home() {
     {id: 'reply', name: 'Reply', aType: XActionType.Reply},
     {id: 'reply-thread', name: 'Reply To Thread', aType: XActionType.ReplyToThread},
     {id: 'analysis', name: 'Token Analysis', aType: XActionType.TokenAnalysis},
-    {id: 'retweet', name: 'Retweet', aType: XActionType.Repost},
-    {id: 'retweet-comment', name: 'Retweet & Comment', aType: XActionType.RepostWithComment},
+    {id: 'retweet', name: 'Repost', aType: XActionType.Repost},
+    {id: 'retweet-comment', name: 'Repost & Comment', aType: XActionType.RepostWithComment},
   ]
 
   const comingSoonCommands = ['reply-thread', 'analysis']

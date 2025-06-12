@@ -83,8 +83,8 @@ export default function Home() {
     {id: 'reply', name: 'Reply', aType: XActionType.Reply},
     {id: 'reply-thread', name: 'Reply To Thread', aType: XActionType.ReplyToThread},
     {id: 'analysis', name: 'Token Analysis', aType: XActionType.TokenAnalysis},
-    {id: 'retweet', name: 'Repost', aType: XActionType.Repost},
-    {id: 'retweet-comment', name: 'Repost & Comment', aType: XActionType.RepostWithComment},
+    {id: 'repost', name: 'Repost', aType: XActionType.Repost},
+    {id: 'repost-comment', name: 'Repost & Comment', aType: XActionType.RepostWithComment},
   ]
 
   const comingSoonCommands = ['reply-thread', 'analysis']
@@ -201,9 +201,11 @@ export default function Home() {
           Welcome to the Friendly Giant AI Agent
         </WelcomeTitle>
         <img src='./icon_wallet_not_connected.png' alt='Wallet not connected'/>
-        <SubTitle>Your wallet isn't connected yet</SubTitle>
-        <Text>To use our services you need to connect your wallet. Please click on the button below to connect it.</Text>
-        <RedButton onClick={() => appKitModal.open()}>Connect Wallet</RedButton>
+        <SubTitleContainer>
+          <SubTitle>Your wallet isn't connected yet</SubTitle>
+          <Text>To use our services you need to connect your wallet. Please click on the button below to connect it.</Text>
+          <RedButton onClick={() => appKitModal.open()}>Connect Wallet</RedButton>
+        </SubTitleContainer>
       </WelcomeSubContainer>
     </WelcomeContainer>
   )
@@ -272,8 +274,8 @@ const MenuGrid = styled.div`
       &.reply { background-image: url('./icon-2_reply.png'); }
       &.reply-thread { background-image: url('./icon-3_reply-to-thread.png'); }
       &.analysis { background-image: url('./icon-4_token-analysis.png'); }
-      &.retweet { background-image: url('./icon-5_retweet.png'); }
-      &.retweet-comment { background-image: url('./icon-6_retweet_and_comment.png'); }
+      &.repost { background-image: url('./icon-5_retweet.png'); }
+      &.repost-comment { background-image: url('./icon-6_retweet_and_comment.png'); }
 
       &.gray, &.Mui-disabled {
         filter: grayscale(1) brightness(0.9);
@@ -323,6 +325,12 @@ const WelcomeTitle = styled.div`
   ${breakpointsUp('margin-bottom', [{ 0: '32px' }, { 1024: '55px' }, { 1536: '55px' }])};
 `
 
+const SubTitleContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`
+
 const SubTitle = styled.div`
   width: 100%;
   text-align: center;
@@ -351,6 +359,7 @@ const Error = styled.div`
 `
 
 const RedButton = styled(Button)`
+  width: 100%;
   color: ${props => props.theme.palette.warning.contrastText};
   background: ${props => props.theme.palette.warning.main};
   padding: 8px 18px;
@@ -362,9 +371,10 @@ const RedButton = styled(Button)`
 const BlueButton = styled(ButtonBase)`
   color: ${props => props.theme.palette.primary.contrastText};
   background: ${props => props.theme.palette.primary.main};
-  padding: 8px 18px;
+  padding: 14px 18px 15px;
   border-radius: 100px;
   font-size: 1.125rem;
+  font-weight: 600;
   text-transform: none;
   &.Mui-disabled {
     filter: grayscale(1) brightness(0.9);
@@ -439,7 +449,7 @@ const EmptyCircle = styled.div`
 
 const HashText = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   margin-top: 16px;
   align-items: center;
 

@@ -261,6 +261,7 @@ const MenuGrid = styled.div`
       justify-content: flex-start !important;
       align-items: flex-start !important;
       transition: all .15s cubic-bezier(.5,1,.25,1);
+      text-align: left;
 
       ${breakpointsUp('font-size', [{ 0: '1rem  !important' }, { 1024: '1.5rem  !important' }])};
       ${breakpointsUp('padding', [{ 0: '12px 16px  !important' }, { 1024: '20px 24px  !important' }])};

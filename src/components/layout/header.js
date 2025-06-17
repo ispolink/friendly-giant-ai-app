@@ -6,7 +6,7 @@ import { Avatar, Button } from '@mui/material'
 import { useAppKitAccount, useAppKitNetwork, useWalletInfo, useDisconnect } from '@reown/appkit/react';
 import { appKitModal } from '@/config';
 import { chains } from '@/config/chain'
-import { breakpointsUp } from '@/utils/responsive';
+import { breakpointsUp, DesktopTabeltViewWrapper, MobileViewWrapper, } from '@/utils/responsive';
 import useTokenBalance from '../web3/useTokenBalance';
 import { formatTokenAmount } from '@/utils/currencies';
 
@@ -50,31 +50,49 @@ export default function Header () {
       <Logo alt="Ispolink" />
       {isActive ?
         (
-          <ButtonBox>
-            <RoundButton style={{ maxWidth: '300px' }}>
-              <RoundButtonIcon>
-                <IspolinkLogo />
-              </RoundButtonIcon>
-              <BalanceLabel end="">{formatTokenAmount(tokenBalance.balance, true)}</BalanceLabel> $GGAI
-            </RoundButton>
-            <RoundButton
-              onClick={() => appKitModal.open({ view: 'Networks' })}
-            >
-              <RoundButtonIcon>
-                {chain ? <ChainIcon alt={chain.name} src={chain.logoUrl} /> : null}
-              </RoundButtonIcon>
-              {chain?.name || 'Unsupported network'}
-            </RoundButton>
-            <RoundButton
-              width="200px"
-              onClick={() => disconnect()}
-            >
-              {walletInfo?.icon && (<RoundButtonIcon><img src={walletInfo?.icon} alt="icon"/></RoundButtonIcon>)}
-              <WalletAddress end={accountState?.address.slice(-4)}>
-                {accountState?.address.slice(0, 5) + '...'}
-              </WalletAddress>
-            </RoundButton>
-          </ButtonBox>
+          <>
+            <DesktopTabeltViewWrapper>
+              <ButtonBox>
+                <RoundButton style={{ maxWidth: '300px' }}>
+                  <RoundButtonIcon>
+                    <IspolinkLogo />
+                  </RoundButtonIcon>
+                  <BalanceLabel end="">{formatTokenAmount(tokenBalance.balance, true)}</BalanceLabel> $GGAI
+                </RoundButton>
+                <RoundButton
+                  onClick={() => appKitModal.open({ view: 'Networks' })}
+                >
+                  <RoundButtonIcon>
+                    {chain ? <ChainIcon alt={chain.name} src={chain.logoUrl} /> : null}
+                  </RoundButtonIcon>
+                  {chain?.name || 'Unsupported network'}
+                </RoundButton>
+                <RoundButton
+                  width="200px"
+                  onClick={() => disconnect()}
+                >
+                  {walletInfo?.icon && (<RoundButtonIcon><img src={walletInfo?.icon} alt="icon"/></RoundButtonIcon>)}
+                  <WalletAddress end={accountState?.address.slice(-4)}>
+                    {accountState?.address.slice(0, 5) + '...'}
+                  </WalletAddress>
+                </RoundButton>
+              </ButtonBox>
+            </DesktopTabeltViewWrapper>
+            <MobileViewWrapper>
+              <RoundButton
+                width="220px"
+                onClick={() => disconnect()}
+              >
+                {walletInfo?.icon && (<RoundButtonIcon><img src={walletInfo?.icon} alt="icon"/></RoundButtonIcon>)}
+                <RoundButtonIcon>
+                  {chain ? <img alt={chain.name} src={chain.logoUrl} /> : null}
+                </RoundButtonIcon>
+                <WalletAddress end={accountState?.address.slice(-4)}>
+                  {accountState?.address.slice(0, 5) + '...'}
+                </WalletAddress>
+              </RoundButton>
+            </MobileViewWrapper>
+          </>
         )
         :
         <BlueButton onClick={() => appKitModal.open()}>Connect Wallet</BlueButton>
@@ -97,13 +115,13 @@ const RoundButton = styled(({ width, ...props }) => <Button {...props} />)`
   background-color: ${props => props.theme.palette.colors.header.themeSwitch.background} !important;
   border-radius: 100px;
   cursor: pointer;
-  padding: 8px 16px;
+  ${breakpointsUp('padding', [{ 0: '4px 6px' }, { 1024: '8px 16px' }])};
   color: ${props => props.theme.palette.colors.header.button.text};
-  font-size: 1.125rem;
+  ${breakpointsUp('font-size', [{ 0: '0.75rem' }, { 1024: '1.125rem' }])};
   font-weight: 600;
   text-transform: unset;
   max-width: ${({ width }) => width || 'initial'};
-  height: 48px;
+  ${breakpointsUp('height', [{ 0: '32px' }, { 1024: '48px' }])};
   white-space: nowrap;
 
   &:hover {
@@ -113,11 +131,11 @@ const RoundButton = styled(({ width, ...props }) => <Button {...props} />)`
 
 const RoundButtonIcon = styled.div`
   display: inline-block;
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  max-width: 32px;
-  margin-right: 8px;
+  ${breakpointsUp('width', [{ 0: '24px' }, { 1024: '32px' }])};
+  ${breakpointsUp('height', [{ 0: '24px' }, { 1024: '32px' }])};
+  ${breakpointsUp('min-width', [{ 0: '24px' }, { 1024: '32px' }])};
+  ${breakpointsUp('max-width', [{ 0: '24px' }, { 1024: '32px' }])};
+  ${breakpointsUp('margin-right', [{ 0: '4px' }, { 1024: '8px' }])};
   border-radius: 100px;
   border: solid 1px ${props => props.theme.palette.colors.header.icon.border};
   fill: ${props => props.theme.palette.colors.header.icon.color};
@@ -128,8 +146,8 @@ const RoundButtonIcon = styled.div`
 
   img,
   svg {
-    width: 20px;
-    height: 20px;
+    ${breakpointsUp('width', [{ 0: '14px' }, { 1024: '20px' }])};
+    ${breakpointsUp('height', [{ 0: '14px' }, { 1024: '20px' }])};
   }
 `
 
@@ -138,7 +156,7 @@ const WalletAddress = styled.span`
   overflow: hidden;
   text-overflow: ellipsis;
   display: inline-block;
-  padding-right: 48px;
+  ${breakpointsUp('padding-right', [{ 0: '32px' }, { 1024: '48px' }])};
   &:after {
     content: attr(end);
     position: absolute;
@@ -180,7 +198,7 @@ const Container = styled.div`
   padding: ;
   ${breakpointsUp('padding', [{ 0: '12px 16px 0' }, { 1024: '24px 32px 0' }])};
   > img {
-    height: 38px;
+    ${breakpointsUp('height', [{ 0: '32px' }, { 1024: '38px' }])};
   }
 
   ${BlueButton} {

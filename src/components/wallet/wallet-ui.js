@@ -8,7 +8,7 @@ import { breakpointsUp } from '@/utils/responsive'
 import useTokenBalance from '../web3/useTokenBalance'
 import useNativeTokenBalance from '../web3/useNativeTokenBalance'
 import { commify } from '@/utils/currencies'
-import { CoingeckoMarketData } from '@/utils/coingecko'
+import { CoingeckoCurrencyId, CoingeckoMarketQuery } from '@/utils/coingecko'
 import { PercentLabel } from '../percentLabel'
 
 export const BasicDialog = ({ title, onClose, open, ...props }) => {
@@ -118,10 +118,12 @@ export function WalletDialog({ open, onClose }) {
   const { disconnect } = useDisconnect()
   const nativeTokenBalance = useNativeTokenBalance()
   const tokenBalance = useTokenBalance()
-  const coingeckoEthereumMarketData = new CoingeckoMarketData('ethereum')
+  const coingeckoQuery = new CoingeckoMarketQuery([CoingeckoCurrencyId.ETH])
 
   useEffect(() => {
-    coingeckoEthereumMarketData.fetch().then(marketInfo => setEthMarketData(marketInfo))
+    coingeckoQuery.fetch().then(marketData => {
+      setEthMarketData(marketData.find(item => item.id === CoingeckoCurrencyId.ETH))
+    })
   }, [])
 
   const current_price = 0.00625
@@ -155,10 +157,12 @@ export function WalletPopover({ onClose, ...props }) {
   const { disconnect } = useDisconnect()
   const nativeTokenBalance = useNativeTokenBalance()
   const tokenBalance = useTokenBalance()
-  const coingeckoEthereumMarketData = new CoingeckoMarketData('ethereum')
+  const coingeckoQuery = new CoingeckoMarketQuery([CoingeckoCurrencyId.ETH])
 
   useEffect(() => {
-    coingeckoEthereumMarketData.fetch().then(marketInfo => setEthMarketData(marketInfo))
+    coingeckoQuery.fetch().then(marketData => {
+      setEthMarketData(marketData.find(item => item.id === CoingeckoCurrencyId.ETH))
+    })
   }, [])
 
   const current_price = 0.00625

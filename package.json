@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prettify": "prettier --write 'src/**/*.js'"
   },
   "dependencies": {
     "@emotion/react": "^11.11.3",
@@ -15,6 +16,7 @@
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/bignumber": "^5.7.0",
     "@ethersproject/units": "^5.7.0",
+    "@mui/icons-material": "^6.4.12",
     "@mui/material": "^6.4.2",
     "@reown/appkit": "^1.6.5",
     "@reown/appkit-adapter-ethers": "^1.6.5",
@@ -33,6 +35,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "eslint": "^8.57.0",
-    "eslint-config-next": "14.2.3"
+    "eslint-config-next": "14.2.3",
+    "prettier": "^3.6.2"
   }
 }

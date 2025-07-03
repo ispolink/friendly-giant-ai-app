@@ -1,5 +1,6 @@
 'use client'
 
+import { formatUnits } from 'viem'
 import { useAccount, useReadContract, useChainId  } from 'wagmi'
 import { ERC20_ABI } from '@/abis';
 import { getTokenContractAddress } from '@/config/chain';
@@ -27,9 +28,13 @@ export const useTokenBalance = () => {
       enabled: !!tokenAddress,
     },
   })
+
+  const balance = rawBalance ?? 0n
+
   return {
-    balance: BigInt(rawBalance ?? 0),
-    decimals,
+    balance,
+    balanceFormatted: formatUnits(balance, decimals),
+    balanceFormattedNumber: Number(formatUnits(balance, decimals)),    decimals,
     tokenAddress,
     chainId,
     isLoading: isLoadingBalance,

@@ -57,7 +57,7 @@ export default function Header () {
                   <RoundButtonIcon>
                     <IspolinkLogo />
                   </RoundButtonIcon>
-                  <BalanceLabel end="">{formatTokenAmount(tokenBalance.balance, true)}</BalanceLabel> $GGAI
+                  <BalanceLabel end="">{formatTokenAmount(tokenBalance.balance)}</BalanceLabel> $GGAI
                 </RoundButton>
                 <RoundButton
                   onClick={() => appKitModal.open({ view: 'Networks' })}

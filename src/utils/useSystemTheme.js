@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 const useSystemTheme = () => {
   const getCurrentTheme = () => {
-    if (typeof window === "undefined") return false; // Ensure SSR safety
+    if (typeof window === 'undefined') return false // Ensure SSR safety
     return window.matchMedia('(prefers-color-scheme: dark)').matches
   }
   const [isDarkTheme, setIsDarkTheme] = useState(getCurrentTheme())
@@ -13,12 +13,12 @@ const useSystemTheme = () => {
   useEffect(() => {
     const darkThemeMq = window.matchMedia('(prefers-color-scheme: dark)')
     if (darkThemeMq.addEventListener) {
-      darkThemeMq.addEventListener('change', mqListener);
+      darkThemeMq.addEventListener('change', mqListener)
     } else {
       // for old browsers
-      darkThemeMq.addListener(mqListener);
+      darkThemeMq.addListener(mqListener)
     }
-    
+
     return () => {
       if (darkThemeMq.removeEventListener) {
         darkThemeMq.removeEventListener('change', mqListener)

@@ -23,9 +23,15 @@ export function commify(value) {
  * @param {BigInt} tokenAmount
  * @param {Boolean} compactNotation
  * @param {Number} precision
+ * @param {string} locale
  * @returns {string}
  */
-export function formatTokenAmount(tokenAmount, compactNotation = true, precision = 5, locale = 'en-US') {
+export function formatTokenAmount(
+  tokenAmount,
+  compactNotation = true,
+  precision = 5,
+  locale = 'en-US'
+) {
   if (!tokenAmount) {
     return '0'
   }
@@ -35,7 +41,7 @@ export function formatTokenAmount(tokenAmount, compactNotation = true, precision
   const integerPart = tokenAmount / divisor
   const fractionPart = tokenAmount % divisor
 
-  const fractionStr = (fractionPart * BigInt(10 ** precision) / divisor)
+  const fractionStr = ((fractionPart * BigInt(10 ** precision)) / divisor)
     .toString()
     .padStart(precision, '0')
 

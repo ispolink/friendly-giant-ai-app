@@ -6,7 +6,6 @@ import { wagmiAdapter, reownProjectId } from '@/config'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cookieToInitialState, WagmiProvider } from 'wagmi'
 
-
 // Set up queryClient
 const queryClient = new QueryClient()
 
@@ -19,9 +18,7 @@ function ContextProvider({ children, cookies }) {
 
   return (
     <WagmiProvider config={wagmiAdapter.wagmiConfig} initialState={initialState}>
-      <QueryClientProvider client={queryClient}>
-          {children}
-      </QueryClientProvider>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </WagmiProvider>
   )
 }

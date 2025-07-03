@@ -2,7 +2,7 @@
 
 // import { cookieStorage, createStorage, http } from '@wagmi/core'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import { createAppKit } from '@reown/appkit/react' 
+import { createAppKit } from '@reown/appkit/react'
 import { mainnet, polygon, bsc, baseSepolia } from '@reown/appkit/networks'
 
 // Get projectId from https://cloud.reown.com
@@ -21,7 +21,7 @@ export const networks = [...mainNetworks, ...testNetworks]
 //Set up the Wagmi Adapter (Config)
 export const wagmiAdapter = new WagmiAdapter({
   projectId: reownProjectId,
-  networks
+  networks,
 })
 
 export const config = wagmiAdapter.wagmiConfig
@@ -31,7 +31,7 @@ const metadata = {
   name: 'Friendly Giant AI',
   description: 'Friendly Giant AI',
   url: 'https://giant-ai.ispolink.com', // origin must match your domain & subdomain
-  icons: ['https://app.ispolink.com/favicon.ico']
+  icons: ['https://app.ispolink.com/favicon.ico'],
 }
 
 // Create the modal
@@ -52,5 +52,5 @@ export const appKitModal = createAppKit({
     onramp: false,
     email: false,
     socials: false,
-  }
+  },
 })

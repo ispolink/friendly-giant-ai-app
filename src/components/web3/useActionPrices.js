@@ -1,6 +1,6 @@
 import { useReadContract, useChainId } from 'wagmi'
 import { XREQUEST_ABI } from '@/abis'
-import { getXRequestContractAddress } from '@/config/chain';
+import { getXRequestContractAddress } from '@/config/chain'
 
 export function useActionPrices() {
   const chainId = useChainId()
@@ -14,6 +14,6 @@ export function useActionPrices() {
       enabled: !!contractAddress,
     },
   })
-  
+
   return result
 }

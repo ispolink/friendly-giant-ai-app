@@ -1,15 +1,15 @@
-'use client';
-import { useEffect, useState } from 'react';
-import styled from '@emotion/styled';
+'use client'
+import { useEffect, useState } from 'react'
+import styled from '@emotion/styled'
 import { Avatar, Dialog, IconButton, Button, Popover } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
-import { useDisconnect } from '@reown/appkit/react';
-import { breakpointsUp } from '@/utils/responsive';
-import useTokenBalance from '../web3/useTokenBalance';
-import useNativeTokenBalance from '../web3/useNativeTokenBalance';
-import { commify } from '@/utils/currencies';
-import { CoingeckoMarketData } from '@/utils/coingecko';
-import { PercentLabel } from '../percentLabel';
+import { useDisconnect } from '@reown/appkit/react'
+import { breakpointsUp } from '@/utils/responsive'
+import useTokenBalance from '../web3/useTokenBalance'
+import useNativeTokenBalance from '../web3/useNativeTokenBalance'
+import { commify } from '@/utils/currencies'
+import { CoingeckoMarketData } from '@/utils/coingecko'
+import { PercentLabel } from '../percentLabel'
 
 export const BasicDialog = ({ title, onClose, open, ...props }) => {
   const handleClose = () => {
@@ -29,45 +29,63 @@ export const BasicDialog = ({ title, onClose, open, ...props }) => {
   )
 }
 
-const Details = ({ handleDisconnect, nativeBalance = {}, nativeMarketData = {}, tokenBalance = {}, tokenMarketData = {}, }) => {
-  const nativeTokenBalanceUsdAmount =  nativeBalance.balanceFormattedNumber * nativeMarketData?.current_price
+const Details = ({
+  handleDisconnect,
+  nativeBalance = {},
+  nativeMarketData = {},
+  tokenBalance = {},
+  tokenMarketData = {},
+}) => {
+  const nativeTokenBalanceUsdAmount =
+    nativeBalance.balanceFormattedNumber * nativeMarketData?.current_price
   const tokenBalanceUsdAmount = tokenBalance.balanceFormattedNumber * tokenMarketData.current_price
   const totalUsdAmount = tokenBalanceUsdAmount + nativeTokenBalanceUsdAmount
 
   return (
     <Container>
-      <div className='top'>
-        <img src='./icon_wallet.svg' alt='wallet' width={16} height={16} />
-        <p className='title'>Your Wallet</p>
+      <div className="top">
+        <img src="./icon_wallet.svg" alt="wallet" width={16} height={16} />
+        <p className="title">Your Wallet</p>
       </div>
-      <div className='content'>
+      <div className="content">
         <div style={{ marginBottom: '24px' }}>
           <CurrencyBox>
             <PriceTotal>${commify(totalUsdAmount.toFixed(2))}</PriceTotal>
             <PriceTotalLabel>Total</PriceTotalLabel>
           </CurrencyBox>
           <div></div>
-          <PercentRoundRectLabel value={nativeMarketData.price_change_percentage_24h + tokenMarketData.price_change_percentage_24h} />
+          <PercentRoundRectLabel
+            value={
+              nativeMarketData.price_change_percentage_24h +
+              tokenMarketData.price_change_percentage_24h
+            }
+          />
         </div>
         <div>
           <CurrencyBox>
-            <img alt="ggai" src='./giantai_logo_01.png' />
+            <img alt="ggai" src="./giantai_logo_01.png" />
             <div>
               <CurrencyName>Giant AI</CurrencyName>
-              <CurrencyValue>{commify(tokenBalance.balanceFormattedNumber.toFixed(5))} GGAI</CurrencyValue>
+              <CurrencyValue>
+                {commify(tokenBalance.balanceFormattedNumber.toFixed(5))} GGAI
+              </CurrencyValue>
             </div>
           </CurrencyBox>
           <div>
             <CurrencyName>${commify(tokenBalanceUsdAmount.toFixed(2))}</CurrencyName>
-            <CurrencyValue>
-              ${commify(tokenMarketData?.current_price?.toString())}
-            </CurrencyValue>
+            <CurrencyValue>${commify(tokenMarketData?.current_price?.toString())}</CurrencyValue>
           </div>
-          <PercentRoundRectLabel size="small" value={tokenMarketData?.price_change_percentage_24h} />
+          <PercentRoundRectLabel
+            size="small"
+            value={tokenMarketData?.price_change_percentage_24h}
+          />
         </div>
         <div>
           <CurrencyBox>
-            <img alt="native" src='https://raw.githubusercontent.com/mikyjo/crypto_assets/main/blockchains/ethereum/eth_logo_128.png' />
+            <img
+              alt="native"
+              src="https://raw.githubusercontent.com/mikyjo/crypto_assets/main/blockchains/ethereum/eth_logo_128.png"
+            />
             <div>
               <CurrencyName>{nativeMarketData?.name}</CurrencyName>
               <CurrencyValue>
@@ -77,23 +95,25 @@ const Details = ({ handleDisconnect, nativeBalance = {}, nativeMarketData = {}, 
           </CurrencyBox>
           <div>
             <CurrencyName>${commify(nativeTokenBalanceUsdAmount.toFixed(2))}</CurrencyName>
-            <CurrencyValue>
-              ${commify(nativeMarketData?.current_price?.toString())}
-            </CurrencyValue>
+            <CurrencyValue>${commify(nativeMarketData?.current_price?.toString())}</CurrencyValue>
           </div>
-          <PercentRoundRectLabel size="small" value={nativeMarketData?.price_change_percentage_24h} />
+          <PercentRoundRectLabel
+            size="small"
+            value={nativeMarketData?.price_change_percentage_24h}
+          />
         </div>
       </div>
-      <div className='bottom'>
+      <div className="bottom">
         <Button onClick={handleDisconnect}>
-          <img src='./icon_wallet_disconnect.svg' alt='disconnect' width={24} height={24} /> Disconnect
+          <img src="./icon_wallet_disconnect.svg" alt="disconnect" width={24} height={24} />{' '}
+          Disconnect
         </Button>
       </div>
     </Container>
   )
 }
 
-export function WalletDialog ({ open, onClose }) {
+export function WalletDialog({ open, onClose }) {
   const [ethMarketData, setEthMarketData] = useState(null)
   const { disconnect } = useDisconnect()
   const nativeTokenBalance = useNativeTokenBalance()
@@ -118,13 +138,19 @@ export function WalletDialog ({ open, onClose }) {
   }
 
   return (
-    <BasicDialog open={open} onClose={onClose} className='details'>
-      <Details handleDisconnect={handleDisconnect} nativeBalance={nativeTokenBalance} nativeMarketData={ethMarketData} tokenBalance={tokenBalance} tokenMarketData={giantAIMarketData} />
+    <BasicDialog open={open} onClose={onClose} className="details">
+      <Details
+        handleDisconnect={handleDisconnect}
+        nativeBalance={nativeTokenBalance}
+        nativeMarketData={ethMarketData}
+        tokenBalance={tokenBalance}
+        tokenMarketData={giantAIMarketData}
+      />
     </BasicDialog>
-  );
+  )
 }
 
-export function WalletPopover ({ onClose, ...props }) {
+export function WalletPopover({ onClose, ...props }) {
   const [ethMarketData, setEthMarketData] = useState(null)
   const { disconnect } = useDisconnect()
   const nativeTokenBalance = useNativeTokenBalance()
@@ -157,9 +183,15 @@ export function WalletPopover ({ onClose, ...props }) {
       onClose={onClose}
       {...props}
     >
-      <Details handleDisconnect={handleDisconnect} nativeBalance={nativeTokenBalance} nativeMarketData={ethMarketData} tokenBalance={tokenBalance} tokenMarketData={giantAIMarketData} />
+      <Details
+        handleDisconnect={handleDisconnect}
+        nativeBalance={nativeTokenBalance}
+        nativeMarketData={ethMarketData}
+        tokenBalance={tokenBalance}
+        tokenMarketData={giantAIMarketData}
+      />
     </Popover>
-  );
+  )
 }
 
 const ChoiceDialog = styled(Dialog)`
@@ -194,8 +226,7 @@ const DialogTitle = styled.div`
   }
 `
 
-const DialogContent = styled.div`
-`
+const DialogContent = styled.div``
 
 const Container = styled.div`
   ${breakpointsUp('min-width', [{ 0: '240px' }, { 1024: '420px' }])};

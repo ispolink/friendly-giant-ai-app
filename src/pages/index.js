@@ -1,37 +1,37 @@
 // pages/index.js
-import { useEffect, useState} from 'react';
+import { useEffect, useState } from 'react'
 import { Button, InputBase, Paper, CircularProgress, Link } from '@mui/material'
-import ButtonBase from '@mui/material/ButtonBase';
-import styled from '@emotion/styled';
+import ButtonBase from '@mui/material/ButtonBase'
+import styled from '@emotion/styled'
 import { Tweet } from 'react-tweet'
-import { appKitModal } from '@/config';
-import { breakpointsUp } from '@/utils/responsive';
-import { useAppKitAccount } from '@reown/appkit/react';
-import { getTweetId } from '@/utils/getTweetId';
+import { appKitModal } from '@/config'
+import { breakpointsUp } from '@/utils/responsive'
+import { useAppKitAccount } from '@reown/appkit/react'
+import { getTweetId } from '@/utils/getTweetId'
 import {
   useTokenBalance,
   useActionPrices,
   useAnalyzeToken,
-  useInteractWithPost
-} from '@/components/web3';
-import { XActionType } from '@/constants';
-import { getBlockExplorerUrl } from '@/config/chain';
-import { useChainId } from 'wagmi';
-import FollowButton from '@/components/following-button';
+  useInteractWithPost,
+} from '@/components/web3'
+import { XActionType } from '@/constants'
+import { getBlockExplorerUrl } from '@/config/chain'
+import { useChainId } from 'wagmi'
+import FollowButton from '@/components/following-button'
 
-const NoCommandDetail = "NoCommandDetail"
-const NoTweetDetail = "NoTweetDetail"
-const TweetDetail = "TweetDetail"
-const SuccessDetail = "SuccessDetail"
-const FailDetail = "FailDetail"
+const NoCommandDetail = 'NoCommandDetail'
+const NoTweetDetail = 'NoTweetDetail'
+const TweetDetail = 'TweetDetail'
+const SuccessDetail = 'SuccessDetail'
+const FailDetail = 'FailDetail'
 
 const Commands = [
-  {id: 'like', name: 'Like', aType: XActionType.Like},
-  {id: 'reply', name: 'Reply', aType: XActionType.Reply},
-  {id: 'reply-thread', name: 'Reply To Thread', aType: XActionType.ReplyToThread},
-  {id: 'analysis', name: 'Token Analysis', aType: XActionType.TokenAnalysis},
-  {id: 'repost', name: 'Repost', aType: XActionType.Repost},
-  {id: 'repost-comment', name: 'Repost & Comment', aType: XActionType.RepostWithComment},
+  { id: 'like', name: 'Like', aType: XActionType.Like },
+  { id: 'reply', name: 'Reply', aType: XActionType.Reply },
+  { id: 'reply-thread', name: 'Reply To Thread', aType: XActionType.ReplyToThread },
+  { id: 'analysis', name: 'Token Analysis', aType: XActionType.TokenAnalysis },
+  { id: 'repost', name: 'Repost', aType: XActionType.Repost },
+  { id: 'repost-comment', name: 'Repost & Comment', aType: XActionType.RepostWithComment },
 ]
 
 export default function Home() {
@@ -45,30 +45,36 @@ export default function Home() {
 
   const chainId = useChainId()
   const accountState = useAppKitAccount()
-  
-  const { refetch: refetchBalance, ...balanceStatus} = useTokenBalance()
+
+  const { refetch: refetchBalance, ...balanceStatus } = useTokenBalance()
   const { refetch: refetchPrices, ...priceStatus } = useActionPrices()
-  const { analyze, isSuccess: isAnalSuccess, isError: isAnalError ,...analyzeStatus } = useAnalyzeToken();
-  const { interact, isSuccess: isActSuccess, isError: isActError, ...interactStatus } = useInteractWithPost();
+  const {
+    analyze,
+    isSuccess: isAnalSuccess,
+    isError: isAnalError,
+    ...analyzeStatus
+  } = useAnalyzeToken()
+  const {
+    interact,
+    isSuccess: isActSuccess,
+    isError: isActError,
+    ...interactStatus
+  } = useInteractWithPost()
 
   const comingSoonCommands = ['reply-thread', 'analysis']
-
 
   const publish = async () => {
     if (!command) return
     setBusy(true)
-    const [balanceResult, priceResult] = await Promise.all([
-      refetchBalance(),
-      refetchPrices()
-    ])
+    const [balanceResult, priceResult] = await Promise.all([refetchBalance(), refetchPrices()])
     if (balanceResult.isError || priceResult.isError) {
       console.error('error on fetching price')
       setBusy(false)
-      return;
+      return
     }
     const balance = balanceResult.data
     const amount = priceResult.data[command.aType]
-    
+
     if (balance < amount) {
       setInsfficientFunds(true)
       setBusy(false)
@@ -81,14 +87,14 @@ export default function Home() {
       } else {
         await interact(command.aType, url)
       }
-    } catch(err) {
+    } catch (err) {
       console.error(err)
     }
     setBusy(false)
   }
 
   const getHash = () => {
-    if (!command) return;
+    if (!command) return
     if (command.aType == XActionType.TokenAnalysis) {
       return analyzeStatus.hash
     } else {
@@ -97,7 +103,7 @@ export default function Home() {
   }
 
   const isPending = () => {
-    if (!command) return false;
+    if (!command) return false
     if (command.aType == XActionType.TokenAnalysis) {
       return analyzeStatus.isPending
     } else {
@@ -105,9 +111,9 @@ export default function Home() {
     }
   }
 
-  const setTweetPreview = (url) => {
+  const setTweetPreview = url => {
     setDetailView(TweetDetail)
-    setTweetId(getTweetId(url))    
+    setTweetId(getTweetId(url))
   }
 
   useEffect(() => {
@@ -142,7 +148,7 @@ export default function Home() {
         <HomeTitle>Friendly Giant AI Agent</HomeTitle>
         <MenuGrid>
           {Commands.map(c => (
-            <div key={c.id} className='button-container'>
+            <div key={c.id} className="button-container">
               <ButtonBase
                 className={`${c.id} ${command && command.id != c.id ? 'gray' : ''}`}
                 disabled={comingSoonCommands.includes(c.id)}
@@ -164,36 +170,38 @@ export default function Home() {
         </MenuGrid>
         {command && (
           <>
-            <PaperBox className={(url && !getTweetId(url)) ? 'error' : ''} sx={{ p: 1, display: 'flex', alignItems: 'center'}}>
+            <PaperBox
+              className={url && !getTweetId(url) ? 'error' : ''}
+              sx={{ p: 1, display: 'flex', alignItems: 'center' }}
+            >
               <InputBase
                 sx={{ mr: 1, flex: 1 }}
                 placeholder="Put your X Post status link here"
                 value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                onKeyDown={(e) => {
-                  if(e.key === 'Enter') {
+                onChange={e => setUrl(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
                     setTweetPreview(url)
                   }
                 }}
               />
               <SendButton
                 disabled={!url || (url && !getTweetId(url))}
-                onClick={() => setTweetPreview(url)}>
-                <img src="./icon_send.svg" alt="send"/>
+                onClick={() => setTweetPreview(url)}
+              >
+                <img src="./icon_send.svg" alt="send" />
               </SendButton>
             </PaperBox>
-            {(url && !getTweetId(url)) && (
-              <Error>
-                Please a valid X Post link
-              </Error>
-            )}
+            {url && !getTweetId(url) && <Error>Please a valid X Post link</Error>}
             <BlueButton
               sx={{ width: '100%' }}
               disabled={
                 (!tweetId && (!url || (url && !getTweetId(url)))) ||
-                balanceStatus.isLoading || priceStatus.isLoading ||
+                balanceStatus.isLoading ||
+                priceStatus.isLoading ||
                 isPending() ||
-                isInsfficientFunds || isBusy
+                isInsfficientFunds ||
+                isBusy
               }
               onClick={() => {
                 if (tweetId) {
@@ -203,96 +211,103 @@ export default function Home() {
                 }
               }}
             >
-              {(isPending() || isBusy) && (<CircularProgress size={20} color="inherit" />)}
+              {(isPending() || isBusy) && <CircularProgress size={20} color="inherit" />}
               {!tweetId ? 'Preview' : isInsfficientFunds ? 'Insufficient funds' : 'Publish'}
             </BlueButton>
             {getHash() && (
               <HashText>
                 View TX:
-                {isPending() && (
-                  <CircularProgress
-                    size={14}
-                    color="inherit"
-                  />
-                )}
+                {isPending() && <CircularProgress size={14} color="inherit" />}
                 <TxLink
                   href={getBlockExplorerUrl(chainId, getHash())}
                   underline="none"
                   target="_blank"
-                >{getHash()}</TxLink>
+                >
+                  {getHash()}
+                </TxLink>
               </HashText>
             )}
           </>
         )}
       </div>
       <DetailContainer>
-        {
-          detailView == NoCommandDetail
-          ? (
-            <DetailBox key="no-command">
-              <img src="./icon_please-select-one-of-the-options.png" alt="send"/>
-              <h1>Please select One of the Options</h1>
-            </DetailBox>
-          ) : detailView == NoTweetDetail
-          ? (
-            <DetailBox key="no-tweet">
-              <img src="./icon_enter-link-to-x-post.png" alt="send"/>
-              <h1>Enter Link to X Post</h1>
-              <div>Enter a link to an X Post you want the Giant AI to interact with and click "Preview"</div>
-            </DetailBox>
-          ) : detailView == TweetDetail
-          ? (
-            <DetailBox key="tweet">
-              {tweetId && <Tweet id={tweetId} />}
-            </DetailBox>
-          ) : detailView == SuccessDetail
-          ? (
-            <SuccessBox key="success">
-              <img src="./icon_check.png" />
-              <h1>We’re processing your request</h1>
-              <div>Your request has been recorded on the blockchain! It will appear on @friendly_giant_ai X profile in 30 min.</div>
-              <TxLink target="_blank" href={getBlockExplorerUrl(chainId, lastTx?.hash)}>View Transaction ID: {lastTx?.hash || 'None'}</TxLink>
-              <BlueButton onClick={() => {
+        {detailView == NoCommandDetail ? (
+          <DetailBox key="no-command">
+            <img src="./icon_please-select-one-of-the-options.png" alt="send" />
+            <h1>Please select One of the Options</h1>
+          </DetailBox>
+        ) : detailView == NoTweetDetail ? (
+          <DetailBox key="no-tweet">
+            <img src="./icon_enter-link-to-x-post.png" alt="send" />
+            <h1>Enter Link to X Post</h1>
+            <div>
+              Enter a link to an X Post you want the Giant AI to interact with and click "Preview"
+            </div>
+          </DetailBox>
+        ) : detailView == TweetDetail ? (
+          <DetailBox key="tweet">{tweetId && <Tweet id={tweetId} />}</DetailBox>
+        ) : detailView == SuccessDetail ? (
+          <SuccessBox key="success">
+            <img src="./icon_check.png" />
+            <h1>We’re processing your request</h1>
+            <div>
+              Your request has been recorded on the blockchain! It will appear on @friendly_giant_ai
+              X profile in 30 min.
+            </div>
+            <TxLink target="_blank" href={getBlockExplorerUrl(chainId, lastTx?.hash)}>
+              View Transaction ID: {lastTx?.hash || 'None'}
+            </TxLink>
+            <BlueButton
+              onClick={() => {
                 setCommand()
                 setLastTx()
                 setDetailView(NoCommandDetail)
-              }}>New Interaction</BlueButton>
-              <FollowButton username="ispolink" dataId="home-follow" caption='Friendly Giant AI' />
-            </SuccessBox>
-          ) : (
-            <ErrorBox key="error">
-              <img src="./icon_x.png" />
-              <h1>Request failed</h1>
-              <div>Oh no! There was an error publishing your request on the blockchain. Try to adjust the gas price/limit and try again.</div>
-              <TxLink target="_blank" href={getBlockExplorerUrl(chainId, lastTx?.hash)}>
-                <div>View Transaction ID: </div><div>{lastTx?.hash || 'None'}</div>
-              </TxLink>
-              <BlueButton
-                disabled={
-                  balanceStatus.isLoading || priceStatus.isLoading ||
-                  isPending() ||
-                  isInsfficientFunds || isBusy
-                }
-                onClick={() => publish()}
-              >
-                {(isPending() || isBusy) && (<CircularProgress size={20} color="inherit" />)}
-                Retry
-              </BlueButton>
-            </ErrorBox>
-          )
-        }
+              }}
+            >
+              New Interaction
+            </BlueButton>
+            <FollowButton username="ispolink" dataId="home-follow" caption="Friendly Giant AI" />
+          </SuccessBox>
+        ) : (
+          <ErrorBox key="error">
+            <img src="./icon_x.png" />
+            <h1>Request failed</h1>
+            <div>
+              Oh no! There was an error publishing your request on the blockchain. Try to adjust the
+              gas price/limit and try again.
+            </div>
+            <TxLink target="_blank" href={getBlockExplorerUrl(chainId, lastTx?.hash)}>
+              <div>View Transaction ID: </div>
+              <div>{lastTx?.hash || 'None'}</div>
+            </TxLink>
+            <BlueButton
+              disabled={
+                balanceStatus.isLoading ||
+                priceStatus.isLoading ||
+                isPending() ||
+                isInsfficientFunds ||
+                isBusy
+              }
+              onClick={() => publish()}
+            >
+              {(isPending() || isBusy) && <CircularProgress size={20} color="inherit" />}
+              Retry
+            </BlueButton>
+          </ErrorBox>
+        )}
       </DetailContainer>
     </HomeContainer>
   ) : (
     <WelcomeContainer>
       <WelcomeSubContainer>
-        <WelcomeTitle>
-          Welcome to the Friendly Giant AI Agent
-        </WelcomeTitle>
-        <img src='./icon_wallet_not_connected.png' alt='Wallet not connected'/>
+        <WelcomeTitle>Welcome to the Friendly Giant AI Agent</WelcomeTitle>
+        <img src="./icon_wallet_not_connected.png" alt="Wallet not connected" />
         <SubTitleContainer>
           <SubTitle>Your wallet isn't connected yet</SubTitle>
-          <Text>To use our services you need to connect your wallet. Please click on the button below to connect it.</Text>
+          <Text>
+            To use our services you need to connect your wallet. Please click on the button below to
+            connect it.
+          </Text>
           <RedButton onClick={() => appKitModal.open()}>Connect Wallet</RedButton>
         </SubTitleContainer>
       </WelcomeSubContainer>
@@ -325,12 +340,12 @@ const MenuGrid = styled.div`
   ${breakpointsUp('grid-template-columns', [
     { 0: 'minmax(159px, 1fr) minmax(159px, 1fr)' },
     { 1024: 'minmax(283px, 1fr) minmax(283px, 1fr) minmax(283px, 1fr)' },
-    { 1536: 'minmax(289px, 1fr) minmax(289px, 1fr)'}
+    { 1536: 'minmax(289px, 1fr) minmax(289px, 1fr)' },
   ])};
   ${breakpointsUp('grid-template-rows', [
     { 0: ' 104px 104px 104px' },
     { 1024: ' 187px 187px' },
-    { 1536: ' 187px 187px 187px'}
+    { 1536: ' 187px 187px 187px' },
   ])};
   ${breakpointsUp('margin-bottom', [{ 0: '16px' }, { 1024: '32px' }, { 1536: '25px' }])};
   ${breakpointsUp('grid-gap', [{ 0: '16px' }, { 1024: '24px' }])};
@@ -349,25 +364,41 @@ const MenuGrid = styled.div`
       background-size: auto 84% !important;
       justify-content: flex-start !important;
       align-items: flex-start !important;
-      transition: all .15s cubic-bezier(.5,1,.25,1);
+      transition: all 0.15s cubic-bezier(0.5, 1, 0.25, 1);
       text-align: left;
 
       ${breakpointsUp('font-size', [{ 0: '1rem  !important' }, { 1024: '1.5rem  !important' }])};
-      ${breakpointsUp('padding', [{ 0: '12px 16px  !important' }, { 1024: '20px 24px  !important' }])};
+      ${breakpointsUp('padding', [
+        { 0: '12px 16px  !important' },
+        { 1024: '20px 24px  !important' },
+      ])};
       margin: 1px !important;
       &:hover {
         margin: 0 !important;
         border: 2px solid ${props => props.theme.palette.colors.formControl.hover.border} !important;
       }
 
-      &.like { background-image: url('./icon-1_like.png'); }
-      &.reply { background-image: url('./icon-2_reply.png'); }
-      &.reply-thread { background-image: url('./icon-3_reply-to-thread.png'); }
-      &.analysis { background-image: url('./icon-4_token-analysis.png'); }
-      &.repost { background-image: url('./icon-5_retweet.png'); }
-      &.repost-comment { background-image: url('./icon-6_retweet_and_comment.png'); }
+      &.like {
+        background-image: url('./icon-1_like.png');
+      }
+      &.reply {
+        background-image: url('./icon-2_reply.png');
+      }
+      &.reply-thread {
+        background-image: url('./icon-3_reply-to-thread.png');
+      }
+      &.analysis {
+        background-image: url('./icon-4_token-analysis.png');
+      }
+      &.repost {
+        background-image: url('./icon-5_retweet.png');
+      }
+      &.repost-comment {
+        background-image: url('./icon-6_retweet_and_comment.png');
+      }
 
-      &.gray, &.Mui-disabled {
+      &.gray,
+      &.Mui-disabled {
         filter: grayscale(1) brightness(0.9);
         opacity: 0.5;
       }
@@ -477,7 +508,7 @@ const BlueButton = styled(ButtonBase)`
 `
 
 const SendButton = styled(BlueButton)`
-  min-width: 50px;  
+  min-width: 50px;
   width: 50px;
   height: 50px;
   border-radius: 8px;
@@ -485,7 +516,7 @@ const SendButton = styled(BlueButton)`
   img {
     width: 24px;
     height: 24px;
-    filter: invert(1)
+    filter: invert(1);
   }
 `
 
@@ -515,11 +546,11 @@ const PaperBox = styled(Paper)`
 
   &:focus,
   &:focus-visible,
-  &:focus-within  {
+  &:focus-within {
     border: 2px solid ${props => props.theme.palette.colors.formControl.focused.border} !important;
   }
 
-  &.error  {
+  &.error {
     border-color: ${props => props.theme.palette.warning.main} !important;
   }
 `
@@ -536,12 +567,9 @@ const DetailContainer = styled.div`
 `
 
 const DetailBox = styled.div`
-  ${breakpointsUp('font-size', [
-    { 0: ' 1rem' },
-    { 1024: ' 1.5rem' },
-  ])};
+  ${breakpointsUp('font-size', [{ 0: ' 1rem' }, { 1024: ' 1.5rem' }])};
   font-weight: normal;
-  line-height: 1.21;  
+  line-height: 1.21;
   width: 100%;
   padding: 16px;
   display: flex;
@@ -551,10 +579,7 @@ const DetailBox = styled.div`
   text-align: center;
 
   h1 {
-    ${breakpointsUp('font-size', [
-      { 0: ' 1.5rem' },
-      { 1024: ' 2rem' },
-    ])};
+    ${breakpointsUp('font-size', [{ 0: ' 1.5rem' }, { 1024: ' 2rem' }])};
     font-weight: bold;
     line-height: 1.19;
   }
@@ -566,25 +591,17 @@ const DetailBox = styled.div`
 `
 const SuccessBox = styled(DetailBox)`
   ${TxLink} {
-    &, *:last-child {
+    &,
+    *:last-child {
       margin-left: 8px;
       text-decoration: none;
       text-wrap-mode: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
     }
-    ${breakpointsUp('display', [
-      { 0: ' block' },
-      { 1024: 'flex' },
-    ])};
-    ${breakpointsUp('max-width', [
-      { 0: ' 200px' },
-      { 1024: ' 500px' },
-    ])};
-    ${breakpointsUp('min-width', [
-      { 0: ' 200px' },
-      { 1024: ' 500px' },
-    ])};
+    ${breakpointsUp('display', [{ 0: ' block' }, { 1024: 'flex' }])};
+    ${breakpointsUp('max-width', [{ 0: ' 200px' }, { 1024: ' 500px' }])};
+    ${breakpointsUp('min-width', [{ 0: ' 200px' }, { 1024: ' 500px' }])};
   }
 
   ${BlueButton} {

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useChainId, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { XREQUEST_ABI } from '@/abis'
-import { getXRequestContractAddress } from '@/config/chain';
+import { getXRequestContractAddress } from '@/config/chain'
 
 export function useInteractWithPost() {
   const chainId = useChainId()
@@ -9,7 +9,12 @@ export function useInteractWithPost() {
 
   const [hash, setHash] = useState(undefined)
   const { writeContractAsync, isError, isPending } = useWriteContract()
-  const { isLoading, isSuccess: isWaitSuccess, isError: isWaitError, isPending: isWaitPending } = useWaitForTransactionReceipt({
+  const {
+    isLoading,
+    isSuccess: isWaitSuccess,
+    isError: isWaitError,
+    isPending: isWaitPending,
+  } = useWaitForTransactionReceipt({
     hash,
     confirmations: 2,
     enabled: !!hash,

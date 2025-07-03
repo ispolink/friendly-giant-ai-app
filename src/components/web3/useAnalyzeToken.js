@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useChainId, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { XREQUEST_ABI } from '@/abis'
-import { getXRequestContractAddress } from '@/config/chain';
+import { getXRequestContractAddress } from '@/config/chain'
 
 export function useAnalyzeToken() {
   const chainId = useChainId()
@@ -9,12 +9,17 @@ export function useAnalyzeToken() {
 
   const [hash, setHash] = useState(undefined)
   const { writeContractAsync, isPending } = useWriteContract()
-  const { isLoading, isSuccess, isError, isPending: isWaitPending } = useWaitForTransactionReceipt({
+  const {
+    isLoading,
+    isSuccess,
+    isError,
+    isPending: isWaitPending,
+  } = useWaitForTransactionReceipt({
     hash,
     enabled: !!hash,
   })
 
-  const analyze = async (tokenTicker) => {
+  const analyze = async tokenTicker => {
     try {
       setHash(undefined)
       const txHash = await writeContractAsync({
@@ -35,7 +40,7 @@ export function useAnalyzeToken() {
     analyze,
     reset,
     hash,
-    isPending : isPending || (!!hash && isWaitPending),
+    isPending: isPending || (!!hash && isWaitPending),
     isLoading: !!hash && isLoading,
     isSuccess: !!hash && isSuccess,
     isError: !!hash && isError,

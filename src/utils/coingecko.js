@@ -12,7 +12,10 @@ export class CoingeckoMarketData {
 
   _cacheData(coingeckoApiResponse) {
     const timestampNow = Math.floor(Date.now() / 1000)
-    localStorage.setItem(this._cacheKey, JSON.stringify({ cachedAt: timestampNow, marketInfo: coingeckoApiResponse }))
+    localStorage.setItem(
+      this._cacheKey,
+      JSON.stringify({ cachedAt: timestampNow, marketInfo: coingeckoApiResponse })
+    )
   }
 
   _hasCacheExpired() {
@@ -24,14 +27,16 @@ export class CoingeckoMarketData {
     }
 
     const timestampNow = Math.floor(Date.now() / 1000)
-    const hasCacheExpired = (cachedAtTimestamp + this._expirationInSeconds) < timestampNow
+    const hasCacheExpired = cachedAtTimestamp + this._expirationInSeconds < timestampNow
     return hasCacheExpired
   }
 
   async fetch() {
     if (this._hasCacheExpired()) {
       try {
-        const response = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${this.coingeckoApiId}`)
+        const response = await fetch(
+          `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${this.coingeckoApiId}`
+        )
         const responseJson = await response.json()
         const apiData = responseJson[0]
 

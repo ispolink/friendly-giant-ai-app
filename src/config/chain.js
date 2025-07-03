@@ -6,25 +6,25 @@ const getAlchemyUrlFor = network =>
   process.env.REACT_APP_ALCHEMY_KEY?.toString() !== ''
     ? `https://${network}.alchemyapi.io/v2/${process.env.REACT_APP_ALCHEMY_KEY}`
     : undefined
-    
+
 const mainChains = []
 
 export const testChains = [
   {
-    "chainId": 84532,
-    "chainIdHex": "0x14a54",
-    "name": "Base Sepolia",
-    "networkUrl": "https://sepolia.base.org",
-    "blockExplorerUrl": "https://base-sepolia.blockscout.com/",
-    "logoUrl": "https://base-sepolia.blockscout.com/assets/favicon/android-chrome-192x192.png",
-    "nativeCurrency": {
-      "name": "Sepolia Ether",
-      "code": "ETH"
-    }
-  }
+    chainId: 84532,
+    chainIdHex: '0x14a54',
+    name: 'Base Sepolia',
+    networkUrl: 'https://sepolia.base.org',
+    blockExplorerUrl: 'https://base-sepolia.blockscout.com/',
+    logoUrl: 'https://base-sepolia.blockscout.com/assets/favicon/android-chrome-192x192.png',
+    nativeCurrency: {
+      name: 'Sepolia Ether',
+      code: 'ETH',
+    },
+  },
 ]
 
-export const chains = [...mainChains, ... testChains]
+export const chains = [...mainChains, ...testChains]
 
 export const Chains = {}
 

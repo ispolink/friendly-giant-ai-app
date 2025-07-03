@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import styled from '@emotion/styled';
-import PropTypes from 'prop-types';
+import React, { useState, useEffect } from 'react'
+import styled from '@emotion/styled'
+import PropTypes from 'prop-types'
 
-function FollowButton({className, username, dataId, caption }) {
+function FollowButton({ className, username, dataId, caption }) {
   useEffect(() => {
     if (!window.twttr) {
-      const script = document.createElement("script");
-      script.src = "https://platform.twitter.com/widgets.js";
-      script.async = true;
-      document.body.appendChild(script);
+      const script = document.createElement('script')
+      script.src = 'https://platform.twitter.com/widgets.js'
+      script.async = true
+      document.body.appendChild(script)
     } else {
-      window.twttr.widgets.load();
+      window.twttr.widgets.load()
     }
-  }, []);
+  }, [])
 
   return (
     <Container className={className || ''}>
@@ -26,18 +26,19 @@ function FollowButton({className, username, dataId, caption }) {
         {caption || 'Follow'}
       </a>
     </Container>
-  );
+  )
 }
 
 FollowButton.propTypes = {
   username: PropTypes.string.isRequired,
   dataId: PropTypes.string.isRequired,
-};
+}
 
-export default FollowButton;
+export default FollowButton
 
 const Container = styled.div`
-  a, #twitter-follow-button {
+  a,
+  #twitter-follow-button {
     display: flex;
     align-items: center;
     display: none;
@@ -50,6 +51,5 @@ const Container = styled.div`
     color: white !important;
     border-radius: 100px;
     height: 51px;
-
   }
 `

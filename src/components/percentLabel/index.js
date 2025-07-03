@@ -1,0 +1,1 @@
+export { PercentLabel } from './percentLabel'

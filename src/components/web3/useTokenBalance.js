@@ -34,7 +34,8 @@ export const useTokenBalance = () => {
   return {
     balance,
     balanceFormatted: formatUnits(balance, decimals),
-    balanceFormattedNumber: Number(formatUnits(balance, decimals)),    decimals,
+    balanceFormattedNumber: Number(formatUnits(balance, decimals)),
+    decimals,
     tokenAddress,
     chainId,
     isLoading: isLoadingBalance,

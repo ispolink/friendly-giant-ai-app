@@ -9,6 +9,7 @@ import { chains } from '@/config/chain'
 import { breakpointsUp, DesktopTabeltViewWrapper, MobileViewWrapper, } from '@/utils/responsive';
 import useTokenBalance from '../web3/useTokenBalance';
 import { formatTokenAmount } from '@/utils/currencies';
+import { WalletDialog, WalletPopover } from '../wallet/wallet-ui';
 
 const logoSVG_W = './ispolink_logo_blue_w.svg';
 const logoSVG_B = './ispolink_logo_blue_b.svg';
@@ -26,11 +27,13 @@ const IspolinkLogo = ({ ...props }) => {
 
 export default function Header () {
   const [chain, setChain] = useState()
+  const [open, setOpen] = useState(false)
+  const [anchorEl, setAnchorEl] = useState(null)
+  const isOpenWalletPopover = Boolean(anchorEl)
 
   const accountState = useAppKitAccount()
   const { chainId } = useAppKitNetwork()
   const { walletInfo } = useWalletInfo()
-  const { disconnect } = useDisconnect()
   const tokenBalance = useTokenBalance()
 
   const isActive = accountState.isConnected
@@ -43,7 +46,14 @@ export default function Header () {
       }
     }
   }, [chainId])
-  
+
+  const handleClick = event => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
 
   return (
     <Container>
@@ -69,7 +79,7 @@ export default function Header () {
                 </RoundButton>
                 <RoundButton
                   width="200px"
-                  onClick={() => disconnect()}
+                  onClick={(e) => handleClick(e)}
                 >
                   {walletInfo?.icon && (<RoundButtonIcon><img src={walletInfo?.icon} alt="icon"/></RoundButtonIcon>)}
                   <WalletAddress end={accountState?.address.slice(-4)}>
@@ -81,7 +91,7 @@ export default function Header () {
             <MobileViewWrapper>
               <RoundButton
                 width="220px"
-                onClick={() => disconnect()}
+                onClick={() => setOpen(true)}
               >
                 {walletInfo?.icon && (<RoundButtonIcon><img src={walletInfo?.icon} alt="icon"/></RoundButtonIcon>)}
                 <RoundButtonIcon>
@@ -97,6 +107,8 @@ export default function Header () {
         :
         <BlueButton onClick={() => appKitModal.open()}>Connect Wallet</BlueButton>
       }
+      <WalletDialog open={open} onClose={() => setOpen(false)} />
+      <WalletPopover open={isOpenWalletPopover} anchorEl={anchorEl} onClose={handleClose} />
     </Container>
   );
 }

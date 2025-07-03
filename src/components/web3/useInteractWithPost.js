@@ -8,9 +8,10 @@ export function useInteractWithPost() {
   const contractAddress = getXRequestContractAddress(chainId)
 
   const [hash, setHash] = useState(undefined)
-  const { writeContractAsync, isPending } = useWriteContract()
-  const { isLoading, isSuccess, isError } = useWaitForTransactionReceipt({
+  const { writeContractAsync, isError, isPending } = useWriteContract()
+  const { isLoading, isSuccess: isWaitSuccess, isError: isWaitError, isPending: isWaitPending } = useWaitForTransactionReceipt({
     hash,
+    confirmations: 2,
     enabled: !!hash,
   })
 
@@ -34,9 +35,9 @@ export function useInteractWithPost() {
     interact,
     reset,
     hash,
-    isPending,
-    isLoading,
-    isSuccess,
-    isError,
+    isPending: isPending || (!!hash && isWaitPending),
+    isLoading: !!hash && isLoading,
+    isSuccess: !!hash && isWaitSuccess,
+    isError: isError || (!!hash && isWaitError),
   }
 }

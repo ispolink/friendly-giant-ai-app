@@ -17,6 +17,22 @@ import {
 import { XActionType } from '@/constants';
 import { getBlockExplorerUrl } from '@/config/chain';
 import { useChainId } from 'wagmi';
+import FollowButton from '@/components/following-button';
+
+const NoCommandDetail = "NoCommandDetail"
+const NoTweetDetail = "NoTweetDetail"
+const TweetDetail = "TweetDetail"
+const SuccessDetail = "SuccessDetail"
+const FailDetail = "FailDetail"
+
+const Commands = [
+  {id: 'like', name: 'Like', aType: XActionType.Like},
+  {id: 'reply', name: 'Reply', aType: XActionType.Reply},
+  {id: 'reply-thread', name: 'Reply To Thread', aType: XActionType.ReplyToThread},
+  {id: 'analysis', name: 'Token Analysis', aType: XActionType.TokenAnalysis},
+  {id: 'repost', name: 'Repost', aType: XActionType.Repost},
+  {id: 'repost-comment', name: 'Repost & Comment', aType: XActionType.RepostWithComment},
+]
 
 export default function Home() {
   const [command, setCommand] = useState()
@@ -24,14 +40,21 @@ export default function Home() {
   const [tweetId, setTweetId] = useState()
   const [isInsfficientFunds, setInsfficientFunds] = useState(false)
   const [isBusy, setBusy] = useState(false)
+  const [detailView, setDetailView] = useState(NoCommandDetail)
+  const [lastTx, setLastTx] = useState()
 
   const chainId = useChainId()
+  const accountState = useAppKitAccount()
+  
   const { refetch: refetchBalance, ...balanceStatus} = useTokenBalance()
   const { refetch: refetchPrices, ...priceStatus } = useActionPrices()
-  const { analyze, ...analyzeStatus } = useAnalyzeToken();
-  const { interact, ...interactStatus } = useInteractWithPost();
+  const { analyze, isSuccess: isAnalSuccess, isError: isAnalError ,...analyzeStatus } = useAnalyzeToken();
+  const { interact, isSuccess: isActSuccess, isError: isActError, ...interactStatus } = useInteractWithPost();
 
-  const onPublish = async () => {
+  const comingSoonCommands = ['reply-thread', 'analysis']
+
+
+  const publish = async () => {
     if (!command) return
     setBusy(true)
     const [balanceResult, priceResult] = await Promise.all([
@@ -52,10 +75,14 @@ export default function Home() {
       return
     }
 
-    if (command.aType == XActionType.TokenAnalysis) {
-      await analyze(url)
-    } else {
-      await interact(command.aType, url)
+    try {
+      if (command.aType == XActionType.TokenAnalysis) {
+        await analyze(url)
+      } else {
+        await interact(command.aType, url)
+      }
+    } catch(err) {
+      console.error(err)
     }
     setBusy(false)
   }
@@ -78,28 +105,45 @@ export default function Home() {
     }
   }
 
-  const commands = [
-    {id: 'like', name: 'Like', aType: XActionType.Like},
-    {id: 'reply', name: 'Reply', aType: XActionType.Reply},
-    {id: 'reply-thread', name: 'Reply To Thread', aType: XActionType.ReplyToThread},
-    {id: 'analysis', name: 'Token Analysis', aType: XActionType.TokenAnalysis},
-    {id: 'repost', name: 'Repost', aType: XActionType.Repost},
-    {id: 'repost-comment', name: 'Repost & Comment', aType: XActionType.RepostWithComment},
-  ]
+  const setTweetPreview = (url) => {
+    setDetailView(TweetDetail)
+    setTweetId(getTweetId(url))    
+  }
 
-  const comingSoonCommands = ['reply-thread', 'analysis']
+  useEffect(() => {
+    if (isAnalSuccess || isActSuccess) {
+      setLastTx({
+        hash: analyzeStatus.hash || interactStatus.hash,
+        isSuccess: true,
+        isError: false,
+      })
+      setDetailView(SuccessDetail)
+      analyzeStatus.reset()
+      interactStatus.reset()
+    }
+  }, [isAnalSuccess, isActSuccess])
 
-  const accountState = useAppKitAccount()
+  useEffect(() => {
+    if (isAnalError || isActError) {
+      setLastTx({
+        hash: analyzeStatus.hash || interactStatus.hash || lastTx?.hash,
+        isSuccess: false,
+        isError: true,
+      })
+      setDetailView(FailDetail)
+      analyzeStatus.reset()
+      interactStatus.reset()
+    }
+  }, [isAnalError, isActError])
 
   return accountState.isConnected ? (
     <HomeContainer>
       <div>
         <HomeTitle>Friendly Giant AI Agent</HomeTitle>
         <MenuGrid>
-          {commands.map(c => (
-            <div className='button-container'>
+          {Commands.map(c => (
+            <div key={c.id} className='button-container'>
               <ButtonBase
-                key={c.id}
                 className={`${c.id} ${command && command.id != c.id ? 'gray' : ''}`}
                 disabled={comingSoonCommands.includes(c.id)}
                 onClick={async () => {
@@ -107,6 +151,7 @@ export default function Home() {
                   analyzeStatus.reset()
                   interactStatus.reset()
                   setCommand(c)
+                  setDetailView(NoTweetDetail)
                 }}
               >
                 {c.name}
@@ -127,11 +172,13 @@ export default function Home() {
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => {
                   if(e.key === 'Enter') {
-                    setTweetId(getTweetId(url))
+                    setTweetPreview(url)
                   }
                 }}
               />
-              <SendButton disabled={!url || (url && !getTweetId(url))} onClick={() => setTweetId(getTweetId(url))}>
+              <SendButton
+                disabled={!url || (url && !getTweetId(url))}
+                onClick={() => setTweetPreview(url)}>
                 <img src="./icon_send.svg" alt="send"/>
               </SendButton>
             </PaperBox>
@@ -145,21 +192,18 @@ export default function Home() {
               disabled={
                 (!tweetId && (!url || (url && !getTweetId(url)))) ||
                 balanceStatus.isLoading || priceStatus.isLoading ||
-                analyzeStatus.isLoading || interactStatus.isLoading ||
+                isPending() ||
                 isInsfficientFunds || isBusy
               }
-              onClick={() => tweetId ? onPublish() : setTweetId(getTweetId(url))}
+              onClick={() => {
+                if (tweetId) {
+                  publish()
+                } else {
+                  setTweetPreview(url)
+                }
+              }}
             >
-              {(
-                balanceStatus.isLoading || priceStatus.isLoading ||
-                analyzeStatus.isLoading || interactStatus.isLoading ||
-                isBusy
-              ) && (
-                <CircularProgress
-                  size={20}
-                  color="inherit"
-                />
-              )}
+              {(isPending() || isBusy) && (<CircularProgress size={20} color="inherit" />)}
               {!tweetId ? 'Preview' : isInsfficientFunds ? 'Insufficient funds' : 'Publish'}
             </BlueButton>
             {getHash() && (
@@ -181,18 +225,63 @@ export default function Home() {
           </>
         )}
       </div>
-      <TweetBox>
-        {command ? (
-          <EmptyTweetBox>
-            {tweetId && <Tweet id={tweetId} />}
-          </EmptyTweetBox>
-        ) : (
-          <EmptyTweetBox>
-            <EmptyCircle />
-            Please select one of the options
-          </EmptyTweetBox>
-        )}
-      </TweetBox>
+      <DetailContainer>
+        {
+          detailView == NoCommandDetail
+          ? (
+            <DetailBox key="no-command">
+              <img src="./icon_please-select-one-of-the-options.png" alt="send"/>
+              <h1>Please select One of the Options</h1>
+            </DetailBox>
+          ) : detailView == NoTweetDetail
+          ? (
+            <DetailBox key="no-tweet">
+              <img src="./icon_enter-link-to-x-post.png" alt="send"/>
+              <h1>Enter Link to X Post</h1>
+              <div>Enter a link to an X Post you want the Giant AI to interact with and click "Preview"</div>
+            </DetailBox>
+          ) : detailView == TweetDetail
+          ? (
+            <DetailBox key="tweet">
+              {tweetId && <Tweet id={tweetId} />}
+            </DetailBox>
+          ) : detailView == SuccessDetail
+          ? (
+            <SuccessBox key="success">
+              <img src="./icon_check.png" />
+              <h1>We’re processing your request</h1>
+              <div>Your request has been recorded on the blockchain! It will appear on @friendly_giant_ai X profile in 30 min.</div>
+              <TxLink target="_blank" href={getBlockExplorerUrl(chainId, lastTx?.hash)}>View Transaction ID: {lastTx?.hash || 'None'}</TxLink>
+              <BlueButton onClick={() => {
+                setCommand()
+                setLastTx()
+                setDetailView(NoCommandDetail)
+              }}>New Interaction</BlueButton>
+              <FollowButton username="ispolink" dataId="home-follow" caption='Friendly Giant AI' />
+            </SuccessBox>
+          ) : (
+            <ErrorBox key="error">
+              <img src="./icon_x.png" />
+              <h1>Request failed</h1>
+              <div>Oh no! There was an error publishing your request on the blockchain. Try to adjust the gas price/limit and try again.</div>
+              <TxLink target="_blank" href={getBlockExplorerUrl(chainId, lastTx?.hash)}>
+                <div>View Transaction ID: </div><div>{lastTx?.hash || 'None'}</div>
+              </TxLink>
+              <BlueButton
+                disabled={
+                  balanceStatus.isLoading || priceStatus.isLoading ||
+                  isPending() ||
+                  isInsfficientFunds || isBusy
+                }
+                onClick={() => publish()}
+              >
+                {(isPending() || isBusy) && (<CircularProgress size={20} color="inherit" />)}
+                Retry
+              </BlueButton>
+            </ErrorBox>
+          )
+        }
+      </DetailContainer>
     </HomeContainer>
   ) : (
     <WelcomeContainer>
@@ -400,6 +489,24 @@ const SendButton = styled(BlueButton)`
   }
 `
 
+const HashText = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 16px;
+  align-items: center;
+
+  > * {
+    margin-left: 8px !important;
+  }
+`
+
+const TxLink = styled(Link)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  width: 240px;
+`
+
 const PaperBox = styled(Paper)`
   border: 1px solid ${props => props.theme.palette.colors.formControl.border} !important;
   box-shadow: none;
@@ -417,7 +524,7 @@ const PaperBox = styled(Paper)`
   }
 `
 
-const TweetBox = styled.div`
+const DetailContainer = styled.div`
   min-height: 354px;
   display: flex;
   align-items: stretch;
@@ -428,9 +535,13 @@ const TweetBox = styled.div`
   ${breakpointsUp('margin-left', [{ 0: '0' }, { 1024: '0' }, { 1536: '32px' }])};
 `
 
-const EmptyTweetBox = styled.div`
-  font-size: 2rem;
-  font-weight: 600;
+const DetailBox = styled.div`
+  ${breakpointsUp('font-size', [
+    { 0: ' 1rem' },
+    { 1024: ' 1.5rem' },
+  ])};
+  font-weight: normal;
+  line-height: 1.21;  
   width: 100%;
   padding: 16px;
   display: flex;
@@ -438,6 +549,61 @@ const EmptyTweetBox = styled.div`
   align-items: center;
   justify-content: center;
   text-align: center;
+
+  h1 {
+    ${breakpointsUp('font-size', [
+      { 0: ' 1.5rem' },
+      { 1024: ' 2rem' },
+    ])};
+    font-weight: bold;
+    line-height: 1.19;
+  }
+
+  img {
+    width: 192px;
+    height: 192px;
+  }
+`
+const SuccessBox = styled(DetailBox)`
+  ${TxLink} {
+    &, *:last-child {
+      margin-left: 8px;
+      text-decoration: none;
+      text-wrap-mode: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    ${breakpointsUp('display', [
+      { 0: ' block' },
+      { 1024: 'flex' },
+    ])};
+    ${breakpointsUp('max-width', [
+      { 0: ' 200px' },
+      { 1024: ' 500px' },
+    ])};
+    ${breakpointsUp('min-width', [
+      { 0: ' 200px' },
+      { 1024: ' 500px' },
+    ])};
+  }
+
+  ${BlueButton} {
+    margin-top: 24px;
+    margin-bottom: 24px;
+    width: 192px;
+  }
+
+  img {
+    width: 96px;
+    height: 96px;
+  }
+`
+
+const ErrorBox = styled(SuccessBox)`
+  ${BlueButton} {
+    margin-top: 24px;
+    width: 138px;
+  }
 `
 
 const EmptyCircle = styled.div`
@@ -446,22 +612,4 @@ const EmptyCircle = styled.div`
   ${breakpointsUp('height', [{ 0: '190px' }, { 1024: '192px' }])};
   border-radius: 192px;
   background-color: ${props => props.theme.palette.colors.formControl.autofill.background};
-`
-
-const HashText = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  margin-top: 16px;
-  align-items: center;
-
-  > * {
-    margin-left: 8px !important;
-  }
-`
-
-const TxLink = styled(Link)`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: inline-block;
-  width: 240px;
 `

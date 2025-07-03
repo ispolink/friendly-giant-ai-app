@@ -9,7 +9,7 @@ export function useAnalyzeToken() {
 
   const [hash, setHash] = useState(undefined)
   const { writeContractAsync, isPending } = useWriteContract()
-  const { isLoading, isSuccess, isError } = useWaitForTransactionReceipt({
+  const { isLoading, isSuccess, isError, isPending: isWaitPending } = useWaitForTransactionReceipt({
     hash,
     enabled: !!hash,
   })
@@ -35,9 +35,9 @@ export function useAnalyzeToken() {
     analyze,
     reset,
     hash,
-    isPending,
-    isLoading,
-    isSuccess,
-    isError,
+    isPending : isPending || (!!hash && isWaitPending),
+    isLoading: !!hash && isLoading,
+    isSuccess: !!hash && isSuccess,
+    isError: !!hash && isError,
   }
 }

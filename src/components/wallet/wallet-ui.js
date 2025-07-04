@@ -38,7 +38,7 @@ const Details = ({
 }) => {
   const nativeTokenBalanceUsdAmount =
     nativeBalance.balanceFormattedNumber * nativeMarketData?.current_price
-  const tokenBalanceUsdAmount = tokenBalance.balanceFormattedNumber * tokenMarketData.current_price
+  const tokenBalanceUsdAmount = tokenBalance.balanceFormattedNumber * tokenMarketData?.current_price
   const totalUsdAmount = tokenBalanceUsdAmount + nativeTokenBalanceUsdAmount
 
   return (
@@ -56,8 +56,8 @@ const Details = ({
           <div></div>
           <PercentRoundRectLabel
             value={
-              nativeMarketData.price_change_percentage_24h +
-              tokenMarketData.price_change_percentage_24h
+              nativeMarketData?.price_change_percentage_24h +
+              tokenMarketData?.price_change_percentage_24h
             }
           />
         </div>

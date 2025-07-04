@@ -50,7 +50,7 @@ export class CoingeckoMarketQuery {
 
   _getCachedData() {
     const data = JSON.parse(localStorage.getItem(this._getCacheKey()))
-    return data?.marketData
+    return data?.marketData ?? []
   }
 
   _cacheData(marketItems) {

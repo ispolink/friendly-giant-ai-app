@@ -8,6 +8,7 @@ export function useAnalyzeToken() {
   const contractAddress = getXRequestContractAddress(chainId)
 
   const [hash, setHash] = useState(undefined)
+  const [tried, setTried] = useState(false)
   const { writeContractAsync, isPending } = useWriteContract()
   const {
     isLoading,
@@ -20,6 +21,7 @@ export function useAnalyzeToken() {
   })
 
   const analyze = async tokenTicker => {
+    setTried(true)
     try {
       setHash(undefined)
       const txHash = await writeContractAsync({
@@ -34,15 +36,18 @@ export function useAnalyzeToken() {
     }
   }
 
-  const reset = () => setHash(undefined)
+  const reset = () => {
+    setHash(undefined)
+    setTried(false)
+  }
 
   return {
     analyze,
     reset,
     hash,
-    isPending: isPending || (!!hash && isWaitPending),
+    isPending: (tried && isPending) || (!!hash && isWaitPending),
     isLoading: !!hash && isLoading,
-    isSuccess: !!hash && isSuccess,
-    isError: !!hash && isError,
+    isSuccess: !!hash && isWaitSuccess,
+    isError: (tried && isError) || (!!hash && isWaitError),
   }
 }

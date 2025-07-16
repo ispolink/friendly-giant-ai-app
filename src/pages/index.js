@@ -15,23 +15,28 @@ import {
   useInteractWithPost,
 } from '@/components/web3'
 import { XActionType } from '@/constants'
-import { getBlockExplorerUrl } from '@/config/chain'
+import { getBlockExplorerUrl, getXRequestContractAddress } from '@/config/chain'
 import { useChainId } from 'wagmi'
 import FollowButton from '@/components/following-button'
+import { useAllowance } from '@/components/web3/useAllowance'
+import { useApprove } from '@/components/web3/useApprove'
+import { useSymbol } from '@/components/web3/useSymbol'
+import { formatTokenAmount } from '@/utils/currencies'
 
 const NoCommandDetail = 'NoCommandDetail'
 const NoTweetDetail = 'NoTweetDetail'
 const TweetDetail = 'TweetDetail'
 const SuccessDetail = 'SuccessDetail'
-const FailDetail = 'FailDetail'
+const FailTransactionDetail = 'FailTransactionDetail'
+const FailApproveDetail = 'FailAllowanceDetail'
 
 const Commands = [
   { id: 'like', name: 'Like', aType: XActionType.Like },
   { id: 'reply', name: 'Reply', aType: XActionType.Reply },
-  { id: 'reply-thread', name: 'Reply To Thread', aType: XActionType.ReplyToThread },
-  { id: 'analysis', name: 'Token Analysis', aType: XActionType.TokenAnalysis },
   { id: 'repost', name: 'Repost', aType: XActionType.Repost },
   { id: 'repost-comment', name: 'Repost & Comment', aType: XActionType.RepostWithComment },
+  { id: 'reply-thread', name: 'Reply To Thread', aType: XActionType.ReplyToThread },
+  { id: 'analysis', name: 'Token Analysis', aType: XActionType.TokenAnalysis },
 ]
 
 export default function Home() {
@@ -42,18 +47,26 @@ export default function Home() {
   const [isBusy, setBusy] = useState(false)
   const [detailView, setDetailView] = useState(NoCommandDetail)
   const [lastTx, setLastTx] = useState()
+  const [tokenSymbol, setTokenSymbol] = useState('GGAI')
+  const [actionAllowance, setActionAllowance] = useState(0)
 
   const chainId = useChainId()
   const accountState = useAppKitAccount()
+  const requestProcessorAddress = getXRequestContractAddress(chainId)
 
   const { refetch: refetchBalance, ...balanceStatus } = useTokenBalance()
+
   const { refetch: refetchPrices, ...priceStatus } = useActionPrices()
+
+  const { refetch: refetchSymbol } = useSymbol()
+
   const {
     analyze,
     isSuccess: isAnalSuccess,
     isError: isAnalError,
     ...analyzeStatus
   } = useAnalyzeToken()
+
   const {
     interact,
     isSuccess: isActSuccess,
@@ -61,24 +74,44 @@ export default function Home() {
     ...interactStatus
   } = useInteractWithPost()
 
+  const { refetch: refetchAllowance } = useAllowance()
+
+  const { approve, isError: isApproveError, ...approveStatus } = useApprove()
+
   const comingSoonCommands = ['reply-thread', 'analysis']
 
   const publish = async () => {
     if (!command) return
+
     setBusy(true)
-    const [balanceResult, priceResult] = await Promise.all([refetchBalance(), refetchPrices()])
-    if (balanceResult.isError || priceResult.isError) {
+    const [balanceResult, priceResult, allowanceResult] = await Promise.all([
+      refetchBalance(),
+      refetchPrices(),
+      refetchAllowance(requestProcessorAddress),
+    ])
+    if (balanceResult.isError || priceResult.isError || allowanceResult.isError) {
       console.error('error on fetching price')
       setBusy(false)
       return
     }
     const balance = balanceResult.data
     const amount = priceResult.data[command.aType]
+    const allowance = allowanceResult.data
+
+    setActionAllowance(amount)
 
     if (balance < amount) {
       setInsfficientFunds(true)
       setBusy(false)
       return
+    }
+
+    if (allowance < amount) {
+      try {
+        await approve(requestProcessorAddress, amount)
+      } catch {
+        return setBusy(false)
+      }
     }
 
     try {
@@ -117,12 +150,20 @@ export default function Home() {
   }
 
   useEffect(() => {
+    const fetch = async () => {
+      const symbolResult = await refetchSymbol()
+      if (symbolResult.status != 'success') {
+        setTimeout(fetch, 1000)
+      } else {
+        setTokenSymbol(symbolResult.data)
+      }
+    }
+    fetch()
+  }, [])
+
+  useEffect(() => {
     if (isAnalSuccess || isActSuccess) {
-      setLastTx({
-        hash: analyzeStatus.hash || interactStatus.hash,
-        isSuccess: true,
-        isError: false,
-      })
+      setLastTx(analyzeStatus.hash || interactStatus.hash)
       setDetailView(SuccessDetail)
       analyzeStatus.reset()
       interactStatus.reset()
@@ -131,21 +172,26 @@ export default function Home() {
 
   useEffect(() => {
     if (isAnalError || isActError) {
-      setLastTx({
-        hash: analyzeStatus.hash || interactStatus.hash || lastTx?.hash,
-        isSuccess: false,
-        isError: true,
-      })
-      setDetailView(FailDetail)
-      analyzeStatus.reset()
-      interactStatus.reset()
+      setLastTx(analyzeStatus.hash || interactStatus.hash || lastTx)
+      setDetailView(FailTransactionDetail)
+      analyzeStatus.hash && analyzeStatus.reset()
+      interactStatus.hash && interactStatus.reset()
     }
   }, [isAnalError, isActError])
+
+  useEffect(() => {
+    if (isApproveError) {
+      setDetailView(FailApproveDetail)
+    }
+  }, [isApproveError])
 
   return accountState.isConnected ? (
     <HomeContainer>
       <div>
-        <HomeTitle>Friendly Giant AI Agent</HomeTitle>
+        <HomeTitle>
+          <div>Friendly Giant AI Agent</div>
+          <p>Your trusted AI KOL & Companion</p>
+        </HomeTitle>
         <MenuGrid>
           {Commands.map(c => (
             <div key={c.id} className="button-container">
@@ -168,66 +214,59 @@ export default function Home() {
             </div>
           ))}
         </MenuGrid>
-        {command && (
-          <>
-            <PaperBox
-              className={url && !getTweetId(url) ? 'error' : ''}
-              sx={{ p: 1, display: 'flex', alignItems: 'center' }}
-            >
-              <InputBase
-                sx={{ mr: 1, flex: 1 }}
-                placeholder="Put your X Post status link here"
-                value={url}
-                onChange={e => setUrl(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    setTweetPreview(url)
-                  }
-                }}
-              />
-              <SendButton
-                disabled={!url || (url && !getTweetId(url))}
-                onClick={() => setTweetPreview(url)}
-              >
-                <img src="./icon_send.svg" alt="send" />
-              </SendButton>
-            </PaperBox>
-            {url && !getTweetId(url) && <Error>Please a valid X Post link</Error>}
-            <BlueButton
-              sx={{ width: '100%' }}
-              disabled={
-                (!tweetId && (!url || (url && !getTweetId(url)))) ||
-                balanceStatus.isLoading ||
-                priceStatus.isLoading ||
-                isPending() ||
-                isInsfficientFunds ||
-                isBusy
+        <PaperBox
+          className={url && !getTweetId(url) ? 'error' : ''}
+          sx={{ p: 1, display: 'flex', alignItems: 'center' }}
+        >
+          <InputBase
+            sx={{ mr: 1, flex: 1 }}
+            disabled={!command}
+            placeholder="https://x.com/elonmusk/status/1941615863423172853"
+            value={url}
+            onChange={e => setUrl(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                setTweetPreview(url)
               }
-              onClick={() => {
-                if (tweetId) {
-                  publish()
-                } else {
-                  setTweetPreview(url)
-                }
-              }}
-            >
-              {(isPending() || isBusy) && <CircularProgress size={20} color="inherit" />}
-              {!tweetId ? 'Preview' : isInsfficientFunds ? 'Insufficient funds' : 'Publish'}
-            </BlueButton>
-            {getHash() && (
-              <HashText>
-                View TX:
-                {isPending() && <CircularProgress size={14} color="inherit" />}
-                <TxLink
-                  href={getBlockExplorerUrl(chainId, getHash())}
-                  underline="none"
-                  target="_blank"
-                >
-                  {getHash()}
-                </TxLink>
-              </HashText>
-            )}
-          </>
+            }}
+          />
+          <SendButton
+            disabled={!url || (url && !getTweetId(url))}
+            onClick={() => setTweetPreview(url)}
+          >
+            <img src="./icon_send.svg" alt="send" />
+          </SendButton>
+        </PaperBox>
+        {url && !getTweetId(url) && <Error>Please a valid X Post link</Error>}
+        <BlueButton
+          sx={{ width: '100%' }}
+          disabled={
+            (!tweetId && (!url || (url && !getTweetId(url)))) ||
+            balanceStatus.isLoading ||
+            priceStatus.isLoading ||
+            isPending() ||
+            isInsfficientFunds ||
+            isBusy
+          }
+          onClick={() => {
+            if (tweetId) {
+              publish()
+            } else {
+              setTweetPreview(url)
+            }
+          }}
+        >
+          {(isPending() || isBusy) && <CircularProgress size={20} color="inherit" />}
+          {!tweetId ? 'Preview' : isInsfficientFunds ? 'Insufficient funds' : 'Publish'}
+        </BlueButton>
+        {getHash() && (
+          <HashText>
+            View TX:
+            {isPending() && <CircularProgress size={14} color="inherit" />}
+            <TxLink href={getBlockExplorerUrl(chainId, getHash())} underline="none" target="_blank">
+              {getHash()}
+            </TxLink>
+          </HashText>
         )}
       </div>
       <DetailContainer>
@@ -254,9 +293,11 @@ export default function Home() {
               Your request has been recorded on the blockchain! It will appear on @friendly_giant_ai
               X profile in 30 min.
             </div>
-            <TxLink target="_blank" href={getBlockExplorerUrl(chainId, lastTx?.hash)}>
-              View Transaction ID: {lastTx?.hash || 'None'}
-            </TxLink>
+            {lastTx && (
+              <TxLink target="_blank" href={getBlockExplorerUrl(chainId, lastTx)}>
+                View Transaction ID: {lastTx || 'None'}
+              </TxLink>
+            )}
             <BlueButton
               onClick={() => {
                 setCommand()
@@ -268,6 +309,28 @@ export default function Home() {
             </BlueButton>
             <FollowButton username="ispolink" dataId="home-follow" caption="Friendly Giant AI" />
           </SuccessBox>
+        ) : detailView == FailApproveDetail ? (
+          <ErrorBox key="error">
+            <img src="./img_wallet_warning.png" />
+            <h1>Approval for {tokenSymbol} failed</h1>
+            <div>
+              {`Oh no, the approval TX for ${tokenSymbol} has failed. You need to approve
+                ${formatTokenAmount(actionAllowance)} ${tokenSymbol} tokens in order to get your request processed.`}
+            </div>
+            <BlueButton
+              disabled={
+                balanceStatus.isLoading ||
+                priceStatus.isLoading ||
+                isPending() ||
+                isInsfficientFunds ||
+                isBusy
+              }
+              onClick={() => publish()}
+            >
+              {(isPending() || isBusy) && <CircularProgress size={20} color="inherit" />}
+              Retry
+            </BlueButton>
+          </ErrorBox>
         ) : (
           <ErrorBox key="error">
             <img src="./icon_x.png" />
@@ -276,10 +339,12 @@ export default function Home() {
               Oh no! There was an error publishing your request on the blockchain. Try to adjust the
               gas price/limit and try again.
             </div>
-            <TxLink target="_blank" href={getBlockExplorerUrl(chainId, lastTx?.hash)}>
-              <div>View Transaction ID: </div>
-              <div>{lastTx?.hash || 'None'}</div>
-            </TxLink>
+            {lastTx && (
+              <TxLink target="_blank" href={getBlockExplorerUrl(chainId, lastTx)}>
+                <div>View Transaction ID: </div>
+                <div>{lastTx || 'None'}</div>
+              </TxLink>
+            )}
             <BlueButton
               disabled={
                 balanceStatus.isLoading ||
@@ -321,18 +386,26 @@ const HomeContainer = styled.div`
   justify-content: space-between;
   align-items: stretch;
   background: ${props => props.theme.palette.background.paper};
+  min-height: calc(100vh - 128px);
   ${breakpointsUp('padding', [{ 0: '32px 24px 24px' }, { 1024: '32px' }, { 1536: '32px;' }])};
   ${breakpointsUp('margin', [{ 0: '16px' }, { 1024: '32px' }, { 1536: '32px 140px 32px;' }])};
-  ${breakpointsUp('border-radius', [{ 0: '16px' }, { 1024: '24px' }, { 1536: '24px;' }])};
+  ${breakpointsUp('border-radius', [{ 0: '16px' }, { 1024: '36px' }, { 1536: '36px;' }])};
 `
 
 const HomeTitle = styled.div`
   width: 100%;
-  text-align: center;
+  text-align: left;
   line-height: 1.1;
   font-weight: 600;
   margin-bottom: 32px;
   ${breakpointsUp('font-size', [{ 0: '2rem' }, { 1024: '2.625rem' }, { 1536: '2.625rem;' }])};
+
+  p {
+    margin: 8px 0;
+    font-size: 1rem;
+    font-weight: 500;
+    opacity: 0.8;
+  }
 `
 
 const MenuGrid = styled.div`
@@ -571,6 +644,7 @@ const DetailBox = styled.div`
   font-weight: normal;
   line-height: 1.21;
   width: 100%;
+  height: -webkit-fill-available;
   padding: 16px;
   display: flex;
   flex-direction: column;

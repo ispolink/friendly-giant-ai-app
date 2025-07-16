@@ -8,6 +8,7 @@ export function useInteractWithPost() {
   const contractAddress = getXRequestContractAddress(chainId)
 
   const [hash, setHash] = useState(undefined)
+  const [tried, setTried] = useState(false)
   const { writeContractAsync, isError, isPending } = useWriteContract()
   const {
     isLoading,
@@ -21,6 +22,7 @@ export function useInteractWithPost() {
   })
 
   const interact = async (actionType, postUri) => {
+    setTried(true)
     try {
       const txHash = await writeContractAsync({
         address: contractAddress,
@@ -34,15 +36,18 @@ export function useInteractWithPost() {
     }
   }
 
-  const reset = () => setHash(undefined)
+  const reset = () => {
+    setHash(undefined)
+    setTried(false)
+  }
 
   return {
     interact,
     reset,
     hash,
-    isPending: isPending || (!!hash && isWaitPending),
+    isPending: (tried && isPending) || (!!hash && isWaitPending),
     isLoading: !!hash && isLoading,
     isSuccess: !!hash && isWaitSuccess,
-    isError: isError || (!!hash && isWaitError),
+    isError: (tried && isError) || (!!hash && isWaitError),
   }
 }

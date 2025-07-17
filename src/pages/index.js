@@ -284,7 +284,7 @@ export default function Home() {
             </div>
           </DetailBox>
         ) : detailView == TweetDetail ? (
-          <DetailBox key="tweet">{tweetId && <Tweet id={tweetId} />}</DetailBox>
+          <TweetBox key="tweet">{tweetId && <Tweet id={tweetId} />}</TweetBox>
         ) : detailView == SuccessDetail ? (
           <SuccessBox key="success">
             <img src="./icon_check.png" />
@@ -663,6 +663,15 @@ const DetailBox = styled.div`
     height: 192px;
   }
 `
+
+const TweetBox = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`
+
 const SuccessBox = styled(DetailBox)`
   ${TxLink} {
     &,

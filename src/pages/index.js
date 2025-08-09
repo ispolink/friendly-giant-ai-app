@@ -22,12 +22,15 @@ import { useAllowance } from '@/components/web3/useAllowance'
 import { useApprove } from '@/components/web3/useApprove'
 import { useSymbol } from '@/components/web3/useSymbol'
 import { formatTokenAmount } from '@/utils/currencies'
+import FailureDialog from '@/components/dialog/failureDialog'
+import SuccessDialog from '@/components/dialog/successDialog'
+import ConfirmCostDialog from '@/components/dialog/confirmCostDialog'
+import WaitingProcessDialog from '@/components/dialog/watingProcessDialog'
 
 const NoCommandDetail = 'NoCommandDetail'
 const NoTweetDetail = 'NoTweetDetail'
 const TweetDetail = 'TweetDetail'
 const SuccessDetail = 'SuccessDetail'
-const FailTransactionDetail = 'FailTransactionDetail'
 const FailApproveDetail = 'FailAllowanceDetail'
 
 const Commands = [
@@ -44,11 +47,10 @@ export default function Home() {
   const [url, setUrl] = useState('')
   const [tweetId, setTweetId] = useState()
   const [isInsfficientFunds, setInsfficientFunds] = useState(false)
-  const [isBusy, setBusy] = useState(false)
   const [detailView, setDetailView] = useState(NoCommandDetail)
   const [lastTx, setLastTx] = useState()
   const [tokenSymbol, setTokenSymbol] = useState('GGAI')
-  const [actionAllowance, setActionAllowance] = useState(0)
+  const [prices, setPrices] = useState({})
 
   const chainId = useChainId()
   const accountState = useAppKitAccount()
@@ -80,10 +82,20 @@ export default function Home() {
 
   const comingSoonCommands = ['reply-thread', 'analysis']
 
+  const [isOpenPublishingCosts, setOpenPublishingCosts] = useState(false)
+  const [isOpenWaitingProcess, setOpenWaitingProcess] = useState(false)
+  const [isOpenFailureDialog, setOpenFailureDialog] = useState(false)
+  const [isOpenSuccessDialog, setOpenSuccessDialog] = useState(false)
+
+  const askPublish = () => {
+    setOpenPublishingCosts(true)
+  }
+
   const publish = async () => {
     if (!command) return
 
-    setBusy(true)
+    setOpenWaitingProcess(true)
+
     const [balanceResult, priceResult, allowanceResult] = await Promise.all([
       refetchBalance(),
       refetchPrices(),
@@ -91,18 +103,19 @@ export default function Home() {
     ])
     if (balanceResult.isError || priceResult.isError || allowanceResult.isError) {
       console.error('error on fetching price')
-      setBusy(false)
+      setOpenWaitingProcess(false)
       return
     }
     const balance = balanceResult.data
     const amount = priceResult.data[command.aType]
     const allowance = allowanceResult.data
 
-    setActionAllowance(amount)
+    setPrices(priceResult.data)
 
     if (balance < amount) {
       setInsfficientFunds(true)
-      setBusy(false)
+      setOpenWaitingProcess(false)
+      setOpenFailureDialog(true)
       return
     }
 
@@ -110,7 +123,9 @@ export default function Home() {
       try {
         await approve(requestProcessorAddress, amount)
       } catch {
-        return setBusy(false)
+        setOpenWaitingProcess(false)
+        setOpenFailureDialog(true)
+        return
       }
     }
 
@@ -122,16 +137,9 @@ export default function Home() {
       }
     } catch (err) {
       console.error(err)
-    }
-    setBusy(false)
-  }
-
-  const getHash = () => {
-    if (!command) return
-    if (command.aType == XActionType.TokenAnalysis) {
-      return analyzeStatus.hash
-    } else {
-      return interactStatus.hash
+      setOpenWaitingProcess(false)
+      setOpenFailureDialog(true)
+      return
     }
   }
 
@@ -150,21 +158,29 @@ export default function Home() {
   }
 
   useEffect(() => {
-    const fetch = async () => {
+    ;(async () => {
       const symbolResult = await refetchSymbol()
       if (symbolResult.status != 'success') {
-        setTimeout(fetch, 1000)
+        setTimeout(fetchSymbol, 1000)
       } else {
         setTokenSymbol(symbolResult.data)
       }
-    }
-    fetch()
+    })()
+    ;(async () => {
+      const priceResult = await refetchPrices()
+      if (priceResult.isError) {
+        console.error('error on fetching price')
+        return
+      }
+      setPrices(priceResult.data)
+    })()
   }, [])
 
   useEffect(() => {
     if (isAnalSuccess || isActSuccess) {
       setLastTx(analyzeStatus.hash || interactStatus.hash)
-      setDetailView(SuccessDetail)
+      setOpenWaitingProcess(false)
+      setOpenSuccessDialog(true)
       analyzeStatus.reset()
       interactStatus.reset()
     }
@@ -173,7 +189,8 @@ export default function Home() {
   useEffect(() => {
     if (isAnalError || isActError) {
       setLastTx(analyzeStatus.hash || interactStatus.hash || lastTx)
-      setDetailView(FailTransactionDetail)
+      setOpenWaitingProcess(false)
+      setOpenFailureDialog(true)
       analyzeStatus.hash && analyzeStatus.reset()
       interactStatus.hash && interactStatus.reset()
     }
@@ -181,7 +198,8 @@ export default function Home() {
 
   useEffect(() => {
     if (isApproveError) {
-      setDetailView(FailApproveDetail)
+      setOpenWaitingProcess(false)
+      setOpenFailureDialog(true)
     }
   }, [isApproveError])
 
@@ -221,7 +239,7 @@ export default function Home() {
           <InputBase
             sx={{ mr: 1, flex: 1 }}
             disabled={!command}
-            placeholder="https://x.com/elonmusk/status/1941615863423172853"
+            placeholder="https://x.com/elonmusk/status/1952583600349819277"
             value={url}
             onChange={e => setUrl(e.target.value)}
             onKeyDown={e => {
@@ -237,37 +255,25 @@ export default function Home() {
             <img src="./icon_send.svg" alt="send" />
           </SendButton>
         </PaperBox>
+        {command && !!prices[command?.aType] && (
+          <Notice>
+            Publishing Costs: {formatTokenAmount(prices[command?.aType], false)} {tokenSymbol}.
+          </Notice>
+        )}
         {url && !getTweetId(url) && <Error>Please a valid X Post link</Error>}
         <BlueButton
           sx={{ width: '100%' }}
-          disabled={
-            (!tweetId && (!url || (url && !getTweetId(url)))) ||
-            balanceStatus.isLoading ||
-            priceStatus.isLoading ||
-            isPending() ||
-            isInsfficientFunds ||
-            isBusy
-          }
+          disabled={!tweetId && (!url || (url && !getTweetId(url)))}
           onClick={() => {
             if (tweetId) {
-              publish()
+              askPublish()
             } else {
               setTweetPreview(url)
             }
           }}
         >
-          {(isPending() || isBusy) && <CircularProgress size={20} color="inherit" />}
           {!tweetId ? 'Preview' : isInsfficientFunds ? 'Insufficient funds' : 'Publish'}
         </BlueButton>
-        {getHash() && (
-          <HashText>
-            View TX:
-            {isPending() && <CircularProgress size={14} color="inherit" />}
-            <TxLink href={getBlockExplorerUrl(chainId, getHash())} underline="none" target="_blank">
-              {getHash()}
-            </TxLink>
-          </HashText>
-        )}
       </div>
       <DetailContainer>
         {detailView == NoCommandDetail ? (
@@ -309,58 +315,31 @@ export default function Home() {
             </BlueButton>
             <FollowButton username="ispolink" dataId="home-follow" caption="Friendly Giant AI" />
           </SuccessBox>
-        ) : detailView == FailApproveDetail ? (
-          <ErrorBox key="error">
-            <img src="./img_wallet_warning.png" />
-            <h1>Approval for {tokenSymbol} failed</h1>
-            <div>
-              {`Oh no, the approval TX for ${tokenSymbol} has failed. You need to approve
-                ${formatTokenAmount(actionAllowance)} ${tokenSymbol} tokens in order to get your request processed.`}
-            </div>
-            <BlueButton
-              disabled={
-                balanceStatus.isLoading ||
-                priceStatus.isLoading ||
-                isPending() ||
-                isInsfficientFunds ||
-                isBusy
-              }
-              onClick={() => publish()}
-            >
-              {(isPending() || isBusy) && <CircularProgress size={20} color="inherit" />}
-              Retry
-            </BlueButton>
-          </ErrorBox>
-        ) : (
-          <ErrorBox key="error">
-            <img src="./icon_x.png" />
-            <h1>Request failed</h1>
-            <div>
-              Oh no! There was an error publishing your request on the blockchain. Try to adjust the
-              gas price/limit and try again.
-            </div>
-            {lastTx && (
-              <TxLink target="_blank" href={getBlockExplorerUrl(chainId, lastTx)}>
-                <div>View Transaction ID: </div>
-                <div>{lastTx || 'None'}</div>
-              </TxLink>
-            )}
-            <BlueButton
-              disabled={
-                balanceStatus.isLoading ||
-                priceStatus.isLoading ||
-                isPending() ||
-                isInsfficientFunds ||
-                isBusy
-              }
-              onClick={() => publish()}
-            >
-              {(isPending() || isBusy) && <CircularProgress size={20} color="inherit" />}
-              Retry
-            </BlueButton>
-          </ErrorBox>
-        )}
+        ) : null}
       </DetailContainer>
+      <ConfirmCostDialog
+        cost={`${formatTokenAmount(prices[command?.aType], false)} ${tokenSymbol}`}
+        open={isOpenPublishingCosts}
+        onOkay={() => {
+          setOpenPublishingCosts(false)
+          publish()
+        }}
+        onCancel={() => setOpenPublishingCosts(false)}
+      />
+      <WaitingProcessDialog open={isOpenWaitingProcess} />
+      <SuccessDialog
+        open={isOpenSuccessDialog}
+        onClose={() => setOpenSuccessDialog(false)}
+        onOkay={() => {
+          setOpenSuccessDialog(false)
+          setDetailView(SuccessDetail)
+        }}
+      />
+      <FailureDialog
+        open={isOpenFailureDialog}
+        onClose={() => setOpenFailureDialog(false)}
+        onOkay={() => setOpenFailureDialog(false)}
+      />
     </HomeContainer>
   ) : (
     <WelcomeContainer>
@@ -552,6 +531,15 @@ const Error = styled.div`
   ${breakpointsUp('margin-bottom', [{ 0: '16px' }, { 1024: '32px' }, { 1536: '32px' }])};
 `
 
+const Notice = styled.div`
+  color: ${props => props.theme.palette.text.primary}88;
+  line-height: 1.43;
+  font-weight: normal;
+  font-size: 0.875rem;
+  ${breakpointsUp('margin-top', [{ 0: '-8px' }, { 1024: '-24px' }, { 1536: '-24px' }])};
+  ${breakpointsUp('margin-bottom', [{ 0: '16px' }, { 1024: '32px' }, { 1536: '32px' }])};
+`
+
 const RedButton = styled(Button)`
   width: 100%;
   color: ${props => props.theme.palette.warning.contrastText};
@@ -612,6 +600,7 @@ const TxLink = styled(Link)`
 `
 
 const PaperBox = styled(Paper)`
+  position: relative;
   border: 1px solid ${props => props.theme.palette.colors.formControl.border} !important;
   box-shadow: none;
   height: 82px;

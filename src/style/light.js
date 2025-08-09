@@ -15,7 +15,7 @@ const light_palette = {
     contrastText: '#FFF',
   },
   secondary: {
-    main: '#55C883',
+    main: '#3ddfb4',
     // light: '#D8F9F0',
     // dark: '#0000B3',
     contrastText: '#FFF',

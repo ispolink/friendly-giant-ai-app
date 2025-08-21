@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import styled from '@emotion/styled'
 import { useTheme } from '@emotion/react'
-import { Avatar, Button } from '@mui/material'
+import { Avatar, Button, useMediaQuery } from '@mui/material'
 import {
   useAppKitAccount,
   useAppKitNetwork,
@@ -16,25 +16,25 @@ import useTokenBalance from '../web3/useTokenBalance'
 import { formatTokenAmount } from '@/utils/currencies'
 import { WalletDialog, WalletPopover } from '../wallet/wallet-ui'
 
-const logoSVG_W = './ispolink_logo_blue_w.svg'
-const logoSVG_B = './ispolink_logo_blue_b.svg'
+const logo = './logo_giant-ai_color.svg'
 
 const tokenIcon = './giantai_logo_01.png'
 
 const Logo = ({ ...props }) => {
   const theme = useTheme()
-  return <img alt="" {...props} src={theme.palette.mode === 'dark' ? logoSVG_W : logoSVG_B} />
+  return <img alt="" {...props} src={logo} />
 }
 
-const IspolinkLogo = ({ ...props }) => {
+const GiantAiLogo = ({ ...props }) => {
   return <img alt="" {...props} src={tokenIcon} />
 }
 
-export default function Header() {
+export default function Header({ setOpenSidemenu }) {
   const [chain, setChain] = useState()
   const [open, setOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState(null)
   const isOpenWalletPopover = Boolean(anchorEl)
+  const isMobile = useMediaQuery('(max-width:768px)')
 
   const accountState = useAppKitAccount()
   const { chainId } = useAppKitNetwork()
@@ -62,14 +62,18 @@ export default function Header() {
 
   return (
     <Container>
-      <Logo alt="Ispolink" />
+      <Logo
+        alt="GIANT.AI"
+        style={{ visibility: isMobile ? 'visible' : 'hidden' }}
+        onClick={() => setOpenSidemenu(true)}
+      />
       {isActive ? (
         <>
           <DesktopTabeltViewWrapper>
             <ButtonBox>
               <RoundButton style={{ maxWidth: '300px' }}>
                 <RoundButtonIcon>
-                  <IspolinkLogo />
+                  <GiantAiLogo />
                 </RoundButtonIcon>
                 <BalanceLabel end="">{formatTokenAmount(tokenBalance.balance)}</BalanceLabel> $GGAI
               </RoundButton>
@@ -222,7 +226,7 @@ const Container = styled.div`
   padding:;
   ${breakpointsUp('padding', [{ 0: '12px 16px 0' }, { 1024: '24px 32px 0' }])};
   > img {
-    ${breakpointsUp('height', [{ 0: '32px' }, { 1024: '38px' }])};
+    ${breakpointsUp('height', [{ 0: '24px' }, { 768: '32px' }])};
   }
 
   ${BlueButton} {

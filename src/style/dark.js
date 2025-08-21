@@ -134,7 +134,7 @@ const dark_palette = {
         backgroundHighlight: '#1c2d41',
       },
       globalSearch: {
-        background: '#1c2d41',
+        background: '#233346',
       },
       border: '#4a5768',
     },

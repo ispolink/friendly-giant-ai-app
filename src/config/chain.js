@@ -32,7 +32,7 @@ export const TestChains = {
   BaseSepolia: {
     chainId: 84532,
     tokenContractAddress: '0xB46F91E0747BB858917ea399392F141750c03CBc',
-    xRequestContractAddress: '0x31C485711dd0A860E4d00fccF6c3Cb3Ed8d99Ff8',
+    xRequestContractAddress: '0xC7064F37a841DD1278AA624F707be6E6428e6f7b',
     urls: ['https://sepolia.base.org'],
   },
 }

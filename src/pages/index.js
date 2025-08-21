@@ -7,13 +7,8 @@ import { Tweet } from 'react-tweet'
 import { appKitModal } from '@/config'
 import { breakpointsUp } from '@/utils/responsive'
 import { useAppKitAccount } from '@reown/appkit/react'
-import { getTweetId } from '@/utils/getTweetId'
-import {
-  useTokenBalance,
-  useActionPrices,
-  useAnalyzeToken,
-  useInteractWithPost,
-} from '@/components/web3'
+import { getTokenTicker, getTweetUri } from '@/utils/sanitizers'
+import { useTokenBalance, useActionPrices, useInteractWithPost } from '@/components/web3'
 import { XActionType } from '@/constants'
 import { getBlockExplorerUrl, getXRequestContractAddress } from '@/config/chain'
 import { useChainId } from 'wagmi'
@@ -30,6 +25,7 @@ import WaitingProcessDialog from '@/components/dialog/watingProcessDialog'
 const NoCommandDetail = 'NoCommandDetail'
 const NoTweetDetail = 'NoTweetDetail'
 const TweetDetail = 'TweetDetail'
+const NoTokenAnalysisDetail = 'NoTokenAnalysisDetail'
 const SuccessDetail = 'SuccessDetail'
 const FailApproveDetail = 'FailAllowanceDetail'
 
@@ -44,12 +40,12 @@ const Commands = [
 
 export default function Home() {
   const [command, setCommand] = useState()
-  const [url, setUrl] = useState('')
-  const [tweetId, setTweetId] = useState()
+  const [inputValue, setInputValue] = useState('')
+  const [tweetPreviewUrl, setTweetPreviewUrl] = useState('')
   const [isInsfficientFunds, setInsfficientFunds] = useState(false)
   const [detailView, setDetailView] = useState(NoCommandDetail)
   const [lastTx, setLastTx] = useState()
-  const [tokenSymbol, setTokenSymbol] = useState('GGAI')
+  const [tokenSymbol, setTokenSymbol] = useState('GIANTAI')
   const [prices, setPrices] = useState({})
 
   const chainId = useChainId()
@@ -61,13 +57,6 @@ export default function Home() {
   const { refetch: refetchPrices, ...priceStatus } = useActionPrices()
 
   const { refetch: refetchSymbol } = useSymbol()
-
-  const {
-    analyze,
-    isSuccess: isAnalSuccess,
-    isError: isAnalError,
-    ...analyzeStatus
-  } = useAnalyzeToken()
 
   const {
     interact,
@@ -130,11 +119,7 @@ export default function Home() {
     }
 
     try {
-      if (command.aType == XActionType.TokenAnalysis) {
-        await analyze(url)
-      } else {
-        await interact(command.aType, url)
-      }
+      await interact(command.aType, inputValue)
     } catch (err) {
       console.error(err)
       setOpenWaitingProcess(false)
@@ -143,25 +128,38 @@ export default function Home() {
     }
   }
 
-  const isPending = () => {
-    if (!command) return false
-    if (command.aType == XActionType.TokenAnalysis) {
-      return analyzeStatus.isPending
-    } else {
-      return interactStatus.isPending
-    }
+  const isTokenAnalysis = () => {
+    return command?.aType === XActionType.TokenAnalysis
   }
 
-  const setTweetPreview = url => {
+  const isValidInput = () => {
+    if (isTokenAnalysis()) {
+      return getTokenTicker(inputValue) !== null
+    }
+
+    return getTweetUri(inputValue) !== null
+  }
+
+  const getInputPlaceholder = () => {
+    return isTokenAnalysis() ? 'GIANTAI' : 'https://x.com/elonmusk/status/1952583600349819277'
+  }
+
+  const getInputError = () => {
+    return isTokenAnalysis()
+      ? 'Please enter a valid Token ticker'
+      : 'Please enter a valid X Post link'
+  }
+
+  const showTweetPreview = url => {
     setDetailView(TweetDetail)
-    setTweetId(getTweetId(url))
+    setTweetPreviewUrl(getTweetUri(url))
   }
 
   useEffect(() => {
     ;(async () => {
       const symbolResult = await refetchSymbol()
       if (symbolResult.status != 'success') {
-        setTimeout(fetchSymbol, 1000)
+        setTimeout(refetchSymbol, 1000)
       } else {
         setTokenSymbol(symbolResult.data)
       }
@@ -177,24 +175,22 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    if (isAnalSuccess || isActSuccess) {
-      setLastTx(analyzeStatus.hash || interactStatus.hash)
+    if (isActSuccess) {
+      setLastTx(interactStatus.hash)
       setOpenWaitingProcess(false)
       setOpenSuccessDialog(true)
-      analyzeStatus.reset()
       interactStatus.reset()
     }
-  }, [isAnalSuccess, isActSuccess])
+  }, [isActSuccess])
 
   useEffect(() => {
-    if (isAnalError || isActError) {
-      setLastTx(analyzeStatus.hash || interactStatus.hash || lastTx)
+    if (isActError) {
+      setLastTx(interactStatus.hash || lastTx)
       setOpenWaitingProcess(false)
       setOpenFailureDialog(true)
-      analyzeStatus.hash && analyzeStatus.reset()
       interactStatus.hash && interactStatus.reset()
     }
-  }, [isAnalError, isActError])
+  }, [isActError])
 
   useEffect(() => {
     if (isApproveError) {
@@ -218,10 +214,11 @@ export default function Home() {
                 disabled={comingSoonCommands.includes(c.id)}
                 onClick={async () => {
                   setInsfficientFunds(false)
-                  analyzeStatus.reset()
                   interactStatus.reset()
                   setCommand(c)
-                  setDetailView(NoTweetDetail)
+                  setDetailView(
+                    c.aType === XActionType.TokenAnalysis ? NoTokenAnalysisDetail : NoTweetDetail
+                  )
                 }}
               >
                 {c.name}
@@ -233,24 +230,24 @@ export default function Home() {
           ))}
         </MenuGrid>
         <PaperBox
-          className={url && !getTweetId(url) ? 'error' : ''}
+          className={inputValue && !isValidInput() ? 'error' : ''}
           sx={{ p: 1, display: 'flex', alignItems: 'center' }}
         >
           <InputBase
             sx={{ mr: 1, flex: 1 }}
             disabled={!command}
-            placeholder="https://x.com/elonmusk/status/1952583600349819277"
-            value={url}
-            onChange={e => setUrl(e.target.value)}
+            placeholder={getInputPlaceholder()}
+            value={inputValue}
+            onChange={e => setInputValue(e.target.value)}
             onKeyDown={e => {
-              if (e.key === 'Enter') {
-                setTweetPreview(url)
+              if (e.key === 'Enter' && !isTokenAnalysis()) {
+                showTweetPreview(inputValue)
               }
             }}
           />
           <SendButton
-            disabled={!url || (url && !getTweetId(url))}
-            onClick={() => setTweetPreview(url)}
+            disabled={isTokenAnalysis() || !isValidInput()}
+            onClick={() => !isTokenAnalysis() && showTweetPreview(inputValue)}
           >
             <img src="./icon_send.svg" alt="send" />
           </SendButton>
@@ -260,19 +257,31 @@ export default function Home() {
             Publishing Costs: {formatTokenAmount(prices[command?.aType], false)} {tokenSymbol}.
           </Notice>
         )}
-        {url && !getTweetId(url) && <Error>Please a valid X Post link</Error>}
+        {inputValue && !isValidInput() && <Error>{getInputError()}</Error>}
         <BlueButton
           sx={{ width: '100%' }}
-          disabled={!tweetId && (!url || (url && !getTweetId(url)))}
+          disabled={!isValidInput()}
           onClick={() => {
-            if (tweetId) {
+            if (isTokenAnalysis()) {
+              askPublish()
+              return
+            }
+
+            if (tweetPreviewUrl) {
+              // If the tweet preview has already been shown, display the payment dialog
               askPublish()
             } else {
-              setTweetPreview(url)
+              showTweetPreview(inputValue)
             }
           }}
         >
-          {!tweetId ? 'Preview' : isInsfficientFunds ? 'Insufficient funds' : 'Publish'}
+          {isTokenAnalysis()
+            ? 'Publish'
+            : !tweetPreviewUrl
+              ? 'Preview'
+              : isInsfficientFunds
+                ? 'Insufficient funds'
+                : 'Publish'}
         </BlueButton>
       </div>
       <DetailContainer>
@@ -289,8 +298,14 @@ export default function Home() {
               Enter a link to an X Post you want the Giant AI to interact with and click "Preview"
             </div>
           </DetailBox>
+        ) : detailView == NoTokenAnalysisDetail ? (
+          <DetailBox key="no-token-analysis">
+            <img src="./giantai_logo_01.png" alt="send" />
+            <h1>Enter a Token symbol</h1>
+            <div>Enter a token symbol that you want Giant AI to analyze and click "Publish"</div>
+          </DetailBox>
         ) : detailView == TweetDetail ? (
-          <TweetBox key="tweet">{tweetId && <Tweet id={tweetId} />}</TweetBox>
+          <TweetBox key="tweet">{tweetPreviewUrl && <Tweet id={tweetPreviewUrl} />}</TweetBox>
         ) : detailView == SuccessDetail ? (
           <SuccessBox key="success">
             <img src="./icon_check.png" />

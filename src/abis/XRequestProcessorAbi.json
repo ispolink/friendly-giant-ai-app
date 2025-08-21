@@ -60,31 +60,18 @@
       },
       {
         "indexed": true,
+        "internalType": "uint128",
+        "name": "unixDay",
+        "type": "uint128"
+      },
+      {
+        "indexed": false,
         "internalType": "string",
-        "name": "xPostUri",
+        "name": "uriOrTicker",
         "type": "string"
       }
     ],
     "name": "NewPostInteraction",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "payer",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "string",
-        "name": "tokenTicker",
-        "type": "string"
-      }
-    ],
-    "name": "NewTokenAnalysis",
     "type": "event"
   },
   {
@@ -118,19 +105,6 @@
     ],
     "name": "PaymentTokenChanged",
     "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "tokenTicker",
-        "type": "string"
-      }
-    ],
-    "name": "analyzeToken",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
   },
   {
     "inputs": [
@@ -190,6 +164,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "getPaymentTokenAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "enum XActionType",
@@ -198,7 +185,7 @@
       },
       {
         "internalType": "string",
-        "name": "postUri",
+        "name": "uriOrTicker",
         "type": "string"
       }
     ],

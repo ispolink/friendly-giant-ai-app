@@ -64,7 +64,7 @@ export default function Header({ setOpenSidemenu }) {
     <Container>
       <Logo
         alt="GIANT.AI"
-        style={{ visibility: isMobile ? 'visible' : 'hidden' }}
+        style={{ visibility: (isMobile || !isActive) ? 'visible' : 'hidden' }}
         onClick={() => setOpenSidemenu(true)}
       />
       {isActive ? (

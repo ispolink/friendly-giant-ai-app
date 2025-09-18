@@ -1,15 +1,19 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import styled from '@emotion/styled'
-import { useTheme } from '@emotion/react'
+import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { Tabs, Tab, useMediaQuery, SwipeableDrawer } from '@mui/material'
+import { useDisconnect } from '@reown/appkit/react'
+import { useAccount } from 'wagmi'
 import { breakpointsDown } from '@/utils/responsive'
 import { KeyboardArrowRight } from '@mui/icons-material'
+import { Avatar, Identity, Name, Badge, Address } from '@coinbase/onchainkit/identity'
+
 import IconApp from '@/assets/icon-app.svg'
-import IconTrade from '@/assets/icon-marketplace.svg'
+import IconTrade from '@/assets/icon_trade.svg'
 import IconHelp from '@/assets/icon-help.svg'
 import IconLogout from '@/assets/icon-logout.svg'
-
 const logo = './logo_giant-ai_color.svg'
 const logoShort = './icon_only_logo_giant-ai_color.svg'
 
@@ -21,91 +25,114 @@ const LogoShort = ({ ...props }) => {
   return <img alt="" {...props} src={logoShort} />
 }
 
-const TAB_LIST = [
-  {
-    label: 'App',
-    href: '/app',
-    icon: <IconApp />,
-  },
-  {
-    label: 'Trade',
-    href: '/trade',
-    icon: <IconTrade />,
-  },
-  {
-    label: 'Help Center',
-    href: '/help',
-    icon: <IconHelp />,
-  },
-  {
-    label: 'Logout',
-    href: '/logout',
-    icon: <IconLogout />,
-  },
-]
+export default dynamic(
+  () =>
+    Promise.resolve(function Sidemenu({ isOpenSidemenu, setOpenSidemenu }) {
+      const [selectedItem, setSelectedItem] = useState('/')
 
-export default function Sidemenu({ isOpenSidemenu, setOpenSidemenu }) {
-  const [selectedItem, setSelectedItem] = useState('/app')
+      const handleChange = (_ev, value) => {
+        setSelectedItem(value)
+      }
 
-  const handleChange = (_ev, value) => {
-    setSelectedItem(value)
-  }
+      const isMobile = useMediaQuery('(max-width:768px)')
+      const { disconnect } = useDisconnect()
+      const { address } = useAccount()
 
-  const isMobile = useMediaQuery('(max-width:768px)')
+      const TAB_LIST = [
+        {
+          label: 'App',
+          href: '/',
+          icon: <IconApp />,
+        },
+        {
+          label: 'Trade',
+          href: '/trade',
+          icon: <IconTrade />,
+        },
+        {
+          label: 'Help Center',
+          href: '/help',
+          icon: <IconHelp />,
+        },
+        {
+          label: 'Logout',
+          href: '',
+          icon: <IconLogout />,
+          onClick: () => disconnect(),
+        },
+      ]
 
-  const TabPanel = () => (
-    <StyledTabs
-      className="full-height"
-      orientation="vertical"
-      variant="scrollable"
-      scrollButtons={false}
-      indicatorColor="primary"
-      value={selectedItem}
-      onChange={handleChange}
-      mode={isOpenSidemenu ? 'expanded' : 'collapsed'}
-    >
-      {TAB_LIST.map((tab, index) => (
-        <Tab
-          key={index}
-          className={`nav-menu-item ${tab.label === 'Logout' ? 'logout' : ''} ${tab.href === selectedItem ? 'active' : ''}`.trim()}
-          icon={tab.icon}
-          iconPosition="start"
-          value={tab.href}
-          label={isOpenSidemenu ? tab.label : ''}
-        />
-      ))}
-    </StyledTabs>
-  )
+      const TabPanel = () => (
+        <StyledTabs
+          className="full-height"
+          orientation="vertical"
+          variant="scrollable"
+          scrollButtons={false}
+          indicatorColor="primary"
+          value={selectedItem}
+          onChange={handleChange}
+          mode={isOpenSidemenu ? 'expanded' : 'collapsed'}
+        >
+          <IdentityContainer>
+            <Identity
+              address={address}
+              schemaId="0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9"
+            >
+              <Avatar />
+              <Name>
+                <Badge />
+              </Name>
+              <Address />
+            </Identity>
+          </IdentityContainer>
 
-  return isMobile ? (
-    <Drawer
-      anchor="left"
-      open={isOpenSidemenu}
-      onClose={() => setOpenSidemenu(false)}
-      onOpen={() => setOpenSidemenu(true)}
-      variant="temporary"
-    >
-      <Logo alt="GIANT.AI" />
-      <TabPanel />
-    </Drawer>
-  ) : (
-    <Container
-      className={isOpenSidemenu ? 'expanded' : 'collapsed'}
-      variant="permanent"
-      anchor="bottom"
-    >
-      <HambrugerButton
-        className={isOpenSidemenu ? 'expanded' : 'collapsed'}
-        onClick={() => setOpenSidemenu(!isOpenSidemenu)}
-      >
-        <KeyboardArrowRight />
-      </HambrugerButton>
-      {isOpenSidemenu && <Logo alt="GIANT.AI" />}
-      {!isOpenSidemenu && <LogoShort alt="GIANT.AI" />}
-      <TabPanel />
-    </Container>
-  )
-}
+          {TAB_LIST.map((tab, index) => (
+            <Tab
+              key={index}
+              className={`nav-menu-item ${tab.label === 'Logout' ? 'logout' : ''} ${tab.href === selectedItem ? 'active' : ''}`.trim()}
+              icon={tab.icon}
+              iconPosition="start"
+              component={Link}
+              value={tab.href}
+              href={tab.href}
+              label={isOpenSidemenu ? tab.label : ''}
+              onClick={tab.onClick}
+            />
+          ))}
+        </StyledTabs>
+      )
+
+      return isMobile ? (
+        <Drawer
+          anchor="left"
+          open={isOpenSidemenu}
+          onClose={() => setOpenSidemenu(false)}
+          onOpen={() => setOpenSidemenu(true)}
+          variant="temporary"
+        >
+          <Logo alt="GIANT.AI" />
+          <TabPanel />
+        </Drawer>
+      ) : (
+        <Container
+          className={isOpenSidemenu ? 'expanded' : 'collapsed'}
+          variant="permanent"
+          anchor="bottom"
+        >
+          <HambrugerButton
+            className={isOpenSidemenu ? 'expanded' : 'collapsed'}
+            onClick={() => setOpenSidemenu(!isOpenSidemenu)}
+          >
+            <KeyboardArrowRight />
+          </HambrugerButton>
+          {isOpenSidemenu && <Logo alt="GIANT.AI" />}
+          {!isOpenSidemenu && <LogoShort alt="GIANT.AI" />}
+          <TabPanel />
+        </Container>
+      )
+    }),
+  { ssr: false }
+)
 
 const Container = styled.div`
   position: fixed;
@@ -243,5 +270,13 @@ const Drawer = styled(SwipeableDrawer)`
       margin-top: 28px;
       margin-left: 22px;
     }
+  }
+`
+
+const IdentityContainer = styled.div`
+  margin: 48px 0;
+  cursor: default;
+  > * {
+    background: transparent !important;
   }
 `

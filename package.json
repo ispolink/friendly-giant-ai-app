@@ -10,6 +10,7 @@
     "prettify": "prettier --write 'src/**/*.js'"
   },
   "dependencies": {
+    "@coinbase/onchainkit": "^0.38.19",
     "@emotion/react": "^11.11.3",
     "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.14.0",
@@ -22,15 +23,15 @@
     "@reown/appkit-adapter-ethers": "^1.6.5",
     "@reown/appkit-adapter-wagmi": "^1.6.5",
     "@tanstack/react-query": "5.56.2",
-    "@wagmi/core": "^2.13.8",
+    "@wagmi/core": "^2.20.2",
     "next": "14.2.3",
     "next-themes": "0.4.3",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-tweet": "^3.2.1",
     "sass": "^1.85.0",
-    "viem": "2.21.26",
-    "wagmi": "^2.12.17"
+    "viem": "^2.36.0",
+    "wagmi": "^2.16.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

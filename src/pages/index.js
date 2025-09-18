@@ -1,12 +1,10 @@
 // pages/index.js
 import { useEffect, useState } from 'react'
-import { Button, InputBase, Paper, CircularProgress, Link } from '@mui/material'
+import { InputBase, Paper, Link } from '@mui/material'
 import ButtonBase from '@mui/material/ButtonBase'
 import styled from '@emotion/styled'
 import { Tweet } from 'react-tweet'
-import { appKitModal } from '@/config'
 import { breakpointsUp } from '@/utils/responsive'
-import { useAppKitAccount } from '@reown/appkit/react'
 import { getTokenTicker, getTweetUri } from '@/utils/sanitizers'
 import { useTokenBalance, useActionPrices, useInteractWithPost } from '@/components/web3'
 import { XActionType } from '@/constants'
@@ -31,7 +29,7 @@ const FailApproveDetail = 'FailAllowanceDetail'
 
 const Commands = [
   { id: 'like', name: 'Like', aType: XActionType.Like },
-  { id: 'reply', name: 'Reply', aType: XActionType.Reply },
+  { id: 'reply', name: 'Reply with AI', aType: XActionType.Reply },
   { id: 'repost', name: 'Repost', aType: XActionType.Repost },
   { id: 'repost-comment', name: 'Repost & Comment', aType: XActionType.RepostWithComment },
   { id: 'reply-thread', name: 'Reply To Thread', aType: XActionType.ReplyToThread },
@@ -49,7 +47,6 @@ export default function Home() {
   const [prices, setPrices] = useState({})
 
   const chainId = useChainId()
-  const accountState = useAppKitAccount()
   const requestProcessorAddress = getXRequestContractAddress(chainId)
 
   const { refetch: refetchBalance, ...balanceStatus } = useTokenBalance()
@@ -199,7 +196,7 @@ export default function Home() {
     }
   }, [isApproveError])
 
-  return accountState.isConnected ? (
+  return (
     <HomeContainer>
       <div>
         <HomeTitle>
@@ -356,21 +353,6 @@ export default function Home() {
         onOkay={() => setOpenFailureDialog(false)}
       />
     </HomeContainer>
-  ) : (
-    <WelcomeContainer>
-      <WelcomeSubContainer>
-        <WelcomeTitle>Welcome to the Friendly Giant AI Agent</WelcomeTitle>
-        <img src="./icon_wallet_not_connected.png" alt="Wallet not connected" />
-        <SubTitleContainer>
-          <SubTitle>Your wallet isn't connected yet</SubTitle>
-          <Text>
-            To use our services you need to connect your wallet. Please click on the button below to
-            connect it.
-          </Text>
-          <RedButton onClick={() => appKitModal.open()}>Connect Wallet</RedButton>
-        </SubTitleContainer>
-      </WelcomeSubContainer>
-    </WelcomeContainer>
   )
 }
 
@@ -480,63 +462,6 @@ const MenuGrid = styled.div`
   }
 `
 
-const WelcomeContainer = styled.div`
-  display: flex;
-  align-content: center;
-  justify-content: center;
-  background: ${props => props.theme.palette.background.paper};
-  ${breakpointsUp('padding', [{ 0: '32px' }, { 1024: '64px' }, { 1536: '64px;' }])};
-  ${breakpointsUp('margin', [{ 0: '16px' }, { 1024: '32px' }, { 1536: '32px 140px 32px;' }])};
-  ${breakpointsUp('border-radius', [{ 0: '16px' }, { 1024: '24px' }, { 1536: '24px;' }])};
-`
-
-const WelcomeSubContainer = styled.div`
-  max-width: 840px;
-  display: flex;
-  align-content: center;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  img {
-    width: 136px;
-    height: 136px;
-    margin-bottom: 16px;
-  }
-`
-
-const WelcomeTitle = styled.div`
-  width: 100%;
-  text-align: center;
-  line-height: 1.1;
-  font-weight: 600;
-  ${breakpointsUp('font-size', [{ 0: '2rem' }, { 1024: '5rem' }, { 1536: '5rem;' }])};
-  ${breakpointsUp('margin-bottom', [{ 0: '32px' }, { 1024: '55px' }, { 1536: '55px' }])};
-`
-
-const SubTitleContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`
-
-const SubTitle = styled.div`
-  width: 100%;
-  text-align: center;
-  line-height: 1;
-  font-weight: bold;
-  font-size: 1.25rem;
-  margin-bottom: 12px;
-`
-
-const Text = styled.div`
-  width: 256px;
-  text-align: center;
-  line-height: 1.43;
-  font-weight: normal;
-  font-size: 0.875rem;
-  margin-bottom: 24px;
-`
-
 const Error = styled.div`
   color: ${props => props.theme.palette.warning.main};
   line-height: 1.43;
@@ -553,16 +478,6 @@ const Notice = styled.div`
   font-size: 0.875rem;
   ${breakpointsUp('margin-top', [{ 0: '-8px' }, { 1024: '-24px' }, { 1536: '-24px' }])};
   ${breakpointsUp('margin-bottom', [{ 0: '16px' }, { 1024: '32px' }, { 1536: '32px' }])};
-`
-
-const RedButton = styled(Button)`
-  width: 100%;
-  color: ${props => props.theme.palette.warning.contrastText};
-  background: ${props => props.theme.palette.warning.main};
-  padding: 8px 18px;
-  border-radius: 100px;
-  font-size: 1.125rem;
-  text-transform: none;
 `
 
 const BlueButton = styled(ButtonBase)`
@@ -593,17 +508,6 @@ const SendButton = styled(BlueButton)`
     width: 24px;
     height: 24px;
     filter: invert(1);
-  }
-`
-
-const HashText = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  margin-top: 16px;
-  align-items: center;
-
-  > * {
-    margin-left: 8px !important;
   }
 `
 
@@ -701,19 +605,4 @@ const SuccessBox = styled(DetailBox)`
     width: 96px;
     height: 96px;
   }
-`
-
-const ErrorBox = styled(SuccessBox)`
-  ${BlueButton} {
-    margin-top: 24px;
-    width: 138px;
-  }
-`
-
-const EmptyCircle = styled.div`
-  margin-bottom: 24px;
-  ${breakpointsUp('width', [{ 0: '190px' }, { 1024: '192px' }])};
-  ${breakpointsUp('height', [{ 0: '190px' }, { 1024: '192px' }])};
-  border-radius: 192px;
-  background-color: ${props => props.theme.palette.colors.formControl.autofill.background};
 `

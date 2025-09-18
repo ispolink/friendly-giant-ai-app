@@ -3,12 +3,8 @@ import { useEffect, useState } from 'react'
 import styled from '@emotion/styled'
 import { useTheme } from '@emotion/react'
 import { Avatar, Button, useMediaQuery } from '@mui/material'
-import {
-  useAppKitAccount,
-  useAppKitNetwork,
-  useWalletInfo,
-  useDisconnect,
-} from '@reown/appkit/react'
+import { useAppKitAccount, useAppKitNetwork, useWalletInfo } from '@reown/appkit/react'
+import { Wallet } from '@coinbase/onchainkit/wallet'
 import { appKitModal } from '@/config'
 import { chains } from '@/config/chain'
 import { breakpointsUp, DesktopTabeltViewWrapper, MobileViewWrapper } from '@/utils/responsive'
@@ -17,11 +13,9 @@ import { formatTokenAmount } from '@/utils/currencies'
 import { WalletDialog, WalletPopover } from '../wallet/wallet-ui'
 
 const logo = './logo_giant-ai_color.svg'
-
 const tokenIcon = './giantai_logo_01.png'
 
 const Logo = ({ ...props }) => {
-  const theme = useTheme()
   return <img alt="" {...props} src={logo} />
 }
 
@@ -64,7 +58,7 @@ export default function Header({ setOpenSidemenu }) {
     <Container>
       <Logo
         alt="GIANT.AI"
-        style={{ visibility: (isMobile || !isActive) ? 'visible' : 'hidden' }}
+        style={{ visibility: isMobile || !isActive ? 'visible' : 'hidden' }}
         onClick={() => setOpenSidemenu(true)}
       />
       {isActive ? (
@@ -112,7 +106,7 @@ export default function Header({ setOpenSidemenu }) {
           </MobileViewWrapper>
         </>
       ) : (
-        <BlueButton onClick={() => appKitModal.open()}>Connect Wallet</BlueButton>
+        <Wallet className="WalletConnect" />
       )}
       <WalletDialog open={open} onClose={() => setOpen(false)} />
       <WalletPopover open={isOpenWalletPopover} anchorEl={anchorEl} onClose={handleClose} />
@@ -231,5 +225,25 @@ const Container = styled.div`
 
   ${BlueButton} {
     ${breakpointsUp('margin-right', [{ 0: '0' }, { 1024: '16px' }])};
+  }
+
+  .WalletConnect button {
+    width: 100%;
+    ${props =>
+      breakpointsUp('color', [
+        { 0: props.theme.palette.primary.main },
+        { 1024: props.theme.palette.primary.contrastText },
+      ])};
+    ${props =>
+      breakpointsUp('background', [
+        { 0: props.theme.palette.background.paperBorder },
+        { 1024: props.theme.palette.primary.main },
+      ])};
+    padding: 8px 18px;
+    border-radius: 100px;
+    ${breakpointsUp('font-size', [{ 0: '0.75rem' }, { 1024: '1.125rem' }, { 1536: '1.125rem;' }])};
+    text-transform: none;
+    font-size: 1.125rem;
+    text-transform: none;
   }
 `

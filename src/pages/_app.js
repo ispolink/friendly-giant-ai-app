@@ -3,13 +3,14 @@ import React, { useState, useEffect } from 'react'
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { Global, css, CacheProvider } from '@emotion/react'
+
 import createEmotionCache from '@/utils/createEmotionCache'
 import useSystemTheme from '@/utils/useSystemTheme'
-import { UserTheme } from '@/constants'
 import { DarkTheme, LightTheme } from '@/style/theme'
 import Layout from '@/components/layout'
 import { appKitModal } from '@/config'
 import ContextProvider from '@/context'
+import '@coinbase/onchainkit/styles.css'
 
 // Client-side  Emotion Cache
 const clientSideEmotionCache = createEmotionCache({ key: 'css', prepend: true })

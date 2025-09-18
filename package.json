@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "prettify": "prettier --write 'src/**/*.js'"
+    "prettify": "prettier --write 'src/**/*.js'",
+    "prepare": "husky"
   },
   "dependencies": {
     "@coinbase/onchainkit": "^0.38.19",
@@ -38,6 +39,7 @@
     "@svgr/webpack": "^8.1.0",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.3",
+    "husky": "^9.1.7",
     "prettier": "^3.6.2"
   }
 }

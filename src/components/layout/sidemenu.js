@@ -14,6 +14,7 @@ import IconApp from '@/assets/icon-app.svg'
 import IconTrade from '@/assets/icon_trade.svg'
 import IconHelp from '@/assets/icon-help.svg'
 import IconLogout from '@/assets/icon-logout.svg'
+import Help from '@/components/dialog/help'
 const logo = './logo_giant-ai_color.svg'
 const logoShort = './icon_only_logo_giant-ai_color.svg'
 
@@ -29,9 +30,11 @@ export default dynamic(
   () =>
     Promise.resolve(function Sidemenu({ isOpenSidemenu, setOpenSidemenu }) {
       const [selectedItem, setSelectedItem] = useState('/')
+      const [helpOpen, setHelpOpen] = useState(false)
 
       const handleChange = (_ev, value) => {
         setSelectedItem(value)
+        if (isMobile) setOpenSidemenu(false)
       }
 
       const isMobile = useMediaQuery('(max-width:768px)')
@@ -51,8 +54,9 @@ export default dynamic(
         },
         {
           label: 'Help Center',
-          href: '/help',
+          href: isMobile ? '/help' : '',
           icon: <IconHelp />,
+          onClick: () => setHelpOpen(true),
         },
         {
           label: 'Logout',
@@ -128,6 +132,7 @@ export default dynamic(
           {isOpenSidemenu && <Logo alt="GIANT.AI" />}
           {!isOpenSidemenu && <LogoShort alt="GIANT.AI" />}
           <TabPanel />
+          <Help open={helpOpen} onClose={() => setHelpOpen(false)} />
         </Container>
       )
     }),

@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import styled from '@emotion/styled'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { Tabs, Tab, useMediaQuery, SwipeableDrawer } from '@mui/material'
 import { useDisconnect } from '@reown/appkit/react'
@@ -29,11 +30,10 @@ const LogoShort = ({ ...props }) => {
 export default dynamic(
   () =>
     Promise.resolve(function Sidemenu({ isOpenSidemenu, setOpenSidemenu }) {
-      const [selectedItem, setSelectedItem] = useState('/')
       const [helpOpen, setHelpOpen] = useState(false)
+      const pathname = usePathname()
 
       const handleChange = (_ev, value) => {
-        setSelectedItem(value)
         if (isMobile) setOpenSidemenu(false)
       }
 
@@ -73,7 +73,7 @@ export default dynamic(
           variant="scrollable"
           scrollButtons={false}
           indicatorColor="primary"
-          value={selectedItem}
+          value={pathname}
           onChange={handleChange}
           mode={isOpenSidemenu ? 'expanded' : 'collapsed'}
         >
@@ -93,7 +93,7 @@ export default dynamic(
           {TAB_LIST.map((tab, index) => (
             <Tab
               key={index}
-              className={`nav-menu-item ${tab.label === 'Logout' ? 'logout' : ''} ${tab.href === selectedItem ? 'active' : ''}`.trim()}
+              className={`nav-menu-item ${tab.label === 'Logout' ? 'logout' : ''} ${tab.href === pathname ? 'active' : ''}`.trim()}
               icon={tab.icon}
               iconPosition="start"
               component={Link}
@@ -189,7 +189,7 @@ const HambrugerButton = styled.div`
   width: 26px;
   height: 26px;
   background-color: ${props => props.theme.palette.background.paper};
-  border: solid 1px gray;
+  border: solid 1px ${props => props.theme.palette.colors.header.border};
   border-radius: 100px;
   cursor: pointer;
   z-index: 1000;

@@ -29,9 +29,9 @@ const FailApproveDetail = 'FailAllowanceDetail'
 
 const Commands = [
   { id: 'like', name: 'Like', aType: XActionType.Like },
-  { id: 'reply', name: 'Reply with AI', aType: XActionType.Reply },
+  { id: 'reply', name: 'AI Reply', aType: XActionType.Reply },
   { id: 'repost', name: 'Repost', aType: XActionType.Repost },
-  { id: 'repost-comment', name: 'Repost & Comment', aType: XActionType.RepostWithComment },
+  { id: 'repost-comment', name: 'Repost & AI Comment', aType: XActionType.RepostWithComment },
   { id: 'reply-thread', name: 'Reply To Thread', aType: XActionType.ReplyToThread },
   { id: 'analysis', name: 'Token Analysis', aType: XActionType.TokenAnalysis },
 ]
@@ -207,7 +207,7 @@ export default function Home() {
           {Commands.map(c => (
             <div key={c.id} className="button-container">
               <ButtonBase
-                className={`${c.id} ${command && command.id != c.id ? 'gray' : ''}`}
+                className={`${c.id} ${command && command.id !== c.id ? 'gray' : ''} ${command?.id === c.id ? 'active' : ''}`}
                 disabled={comingSoonCommands.includes(c.id)}
                 onClick={async () => {
                   setInsfficientFunds(false)
@@ -422,6 +422,7 @@ const MenuGrid = styled.div`
         { 1024: '20px 24px  !important' },
       ])};
       margin: 1px !important;
+      &.active,
       &:hover {
         margin: 0 !important;
         border: 2px solid ${props => props.theme.palette.colors.formControl.hover.border} !important;

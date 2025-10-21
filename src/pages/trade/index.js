@@ -283,7 +283,7 @@ const SwapCard = styled.div`
   }
 
   .SwapAmountInput {
-    background: #f0f4ff !important;
+    background: ${props => props.theme.palette.colors.swapbox.background} !important;
 
     button {
       box-shadow: none !important;

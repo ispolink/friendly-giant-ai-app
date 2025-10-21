@@ -5,10 +5,10 @@ const light_palette = {
   common: {
     black: '#1C2D41',
     white: '#FFF',
-    blue: '#0000EE',
+    blue: '#6f91ff',
   },
   primary: {
-    main: '#0000FF',
+    main: '#6f91ff',
     semiLight: '#ced2d6',
     light: '#EAEFFF',
     dark: '#0000B3',
@@ -80,10 +80,10 @@ const light_palette = {
     background: '#FFFFFF',
     foreground: '#1C2D41',
     footer: {
-      text: '#0000FF',
+      text: '#6f91ff',
     },
     anchor: {
-      normal: '#0000FF',
+      normal: '#6f91ff',
     },
     skeleton: {
       base: '#ebebeb',
@@ -93,14 +93,14 @@ const light_palette = {
       background: '#FFF',
       border: '#ced2d6',
       label: {
-        filled: '#0000FF',
+        filled: '#6f91ff',
         error: '#FF4878',
       },
       hover: {
-        border: '#0000FF',
+        border: '#6f91ff',
       },
       focused: {
-        border: '#0000FF',
+        border: '#6f91ff',
       },
       autofill: {
         background: '#EAEFFF',
@@ -144,6 +144,9 @@ const light_palette = {
       },
     },
     tweetbox: {
+      background: '#f0f4ff',
+    },
+    swapbox: {
       background: '#f0f4ff',
     },
   },

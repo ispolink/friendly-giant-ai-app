@@ -146,6 +146,9 @@ const dark_palette = {
     tweetbox: {
       background: '#101a26',
     },
+    swapbox: {
+      background: '#2e3d50',
+    },
   },
 }
 
